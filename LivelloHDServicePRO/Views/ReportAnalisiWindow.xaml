@@ -1,0 +1,356 @@
+<Window x:Class="LivelloHDServicePRO.Views.ReportAnalisiWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LivelloHDServicePRO.Views"
+        mc:Ignorable="d"
+        Title="Report di Analisi - Qualita del Servizio" Height="900" Width="1400"
+        WindowState="Maximized" Background="WhiteSmoke">
+
+    <Window.Resources>
+        <!-- Style per le Card -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Gray" Opacity="0.3" ShadowDepth="3" BlurRadius="8"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Style per i titoli delle sezioni -->
+        <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#FF2196F3"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+
+        <!-- Style per le statistiche principali -->
+        <Style x:Key="StatNumberStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="36"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,5"/>
+        </Style>
+
+        <Style x:Key="StatLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="Gray"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#FF2196F3" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="REPORT DI ANALISI - QUALITA DEL SERVIZIO" 
+                               FontSize="24" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock x:Name="PeriodoTextBlock" Text="Periodo di analisi: Loading..." 
+                               FontSize="14" Foreground="#E3F2FD" Margin="0,5,0,0"/>
+                    <TextBlock x:Name="GeneratoTextBlock" Text="Generato il: Loading..." 
+                               FontSize="12" Foreground="#E3F2FD"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="EsportaReportButton" Content="Esporta Report" 
+                            Click="EsportaReportButton_Click"
+                            Background="White" Foreground="#FF2196F3" 
+                            Padding="15,8" Margin="10,0" FontWeight="Bold"/>
+                    <Button x:Name="EsportaPdfButton" Content="Esporta PDF" 
+                            Click="EsportaPdfButton_Click"
+                            Background="#FFE91E63" Foreground="White" 
+                            Padding="15,8" Margin="5,0" FontWeight="Bold"/>
+                    <Button x:Name="RisorseButton" Content="Risorse" 
+                            Click="RisorseButton_Click"
+                            Background="#FF9C27B0" Foreground="White" 
+                            Padding="15,8" Margin="5,0" FontWeight="Bold"
+                            ToolTip="Analisi dettagliata delle risorse/proprietari"/>
+                    <Button x:Name="StampaButton" Content="Stampa" 
+                            Click="StampaButton_Click"
+                            Background="Transparent" Foreground="White" BorderBrush="White"
+                            Padding="15,8" FontWeight="Bold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Content con ScrollViewer -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="10">
+
+                <!-- Statistiche Generali -->
+                <Border Style="{StaticResource CardStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock x:Name="TotalTicketsText" Text="0" Style="{StaticResource StatNumberStyle}" Foreground="#FF2196F3"/>
+                            <TextBlock Text="TICKET TOTALI" Style="{StaticResource StatLabelStyle}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock x:Name="TicketsRisoltiText" Text="0" Style="{StaticResource StatNumberStyle}" Foreground="#4CAF50"/>
+                            <TextBlock Text="RISOLTI" Style="{StaticResource StatLabelStyle}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <TextBlock x:Name="PercentualeEntroSlaText" Text="0%" Style="{StaticResource StatNumberStyle}" Foreground="#FF9800"/>
+                            <TextBlock Text="ENTRO SLA" Style="{StaticResource StatLabelStyle}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3">
+                            <TextBlock x:Name="PercentualeFuoriSlaText" Text="0%" Style="{StaticResource StatNumberStyle}" Foreground="#F44336"/>
+                            <TextBlock Text="FUORI SLA" Style="{StaticResource StatLabelStyle}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Tempi Medi per Priorita -->
+                    <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="TEMPI MEDI PER PRIORITA" Style="{StaticResource SectionTitleStyle}"/>
+                            <DataGrid x:Name="TempiMediDataGrid" AutoGenerateColumns="False" 
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      Background="Transparent" BorderThickness="0"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" 
+                                      IsReadOnly="True" SelectionMode="Single">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Priorita" Binding="{Binding Priorita}" Width="80"/>
+                                    <DataGridTextColumn Header="# Ticket" Binding="{Binding NumeroTickets}" Width="60"/>
+                                    <DataGridTextColumn Header="TMC Medio" Binding="{Binding TempoMedioTMCFormatted}" Width="80"/>
+                                    <DataGridTextColumn Header="T-EFF Medio" Binding="{Binding TempoMedioTEFFFormatted}" Width="80"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Performance SLA -->
+                    <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="PERFORMANCE SLA" Style="{StaticResource SectionTitleStyle}"/>
+                            <DataGrid x:Name="SlaPerformanceDataGrid" AutoGenerateColumns="False" 
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      Background="Transparent" BorderThickness="0"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" 
+                                      IsReadOnly="True" SelectionMode="Single">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Categoria" Binding="{Binding Categoria}" Width="80"/>
+                                    <DataGridTextColumn Header="Totali" Binding="{Binding TicketsTotali}" Width="60"/>
+                                    <DataGridTextColumn Header="% Entro" Binding="{Binding PercentualeEntroSLA, StringFormat={}{0:F1}%}" Width="70"/>
+                                    <DataGridTextColumn Header="% Fuori" Binding="{Binding PercentualeFuoriSLA, StringFormat={}{0:F1}%}" Width="70"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Analisi Proprietari -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="ANALISI PROPRIETARI" Style="{StaticResource SectionTitleStyle}"/>
+                        <DataGrid x:Name="ProprietariDataGrid" AutoGenerateColumns="False" 
+                                  HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                  Background="Transparent" BorderThickness="0"
+                                  CanUserAddRows="False" CanUserDeleteRows="False" 
+                                  IsReadOnly="True" SelectionMode="Single"
+                                  MaxHeight="300" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Proprietario" Binding="{Binding NomeProprietario}" Width="150"/>
+                                <DataGridTextColumn Header="# Ticket" Binding="{Binding TotalTickets}" Width="70"/>
+                                <DataGridTextColumn Header="% Risoluzione" Binding="{Binding PercentualeRisoluzione, StringFormat={}{0:F1}%}" Width="90"/>
+                                <DataGridTextColumn Header="Valutazione" Binding="{Binding DescrizioneValutazione}" Width="150"/>
+                            </DataGrid.Columns>
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ValutazioneComplessiva}" Value="Critico">
+                                            <Setter Property="Background" Value="#FFEBEE"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ValutazioneComplessiva}" Value="Ottimo">
+                                            <Setter Property="Background" Value="#E8F5E8"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Analisi Proprietari per Priorita -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="ANALISI PROPRIETARI PER PRIORITA" Style="{StaticResource SectionTitleStyle}"/>
+                        <DataGrid x:Name="ProprietariPrioritaDataGrid" AutoGenerateColumns="False" 
+                                  HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                  Background="Transparent" BorderThickness="0"
+                                  CanUserAddRows="False" CanUserDeleteRows="False" 
+                                  IsReadOnly="True" SelectionMode="Single"
+                                  MaxHeight="400" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Proprietario" Binding="{Binding NomeProprietario}" Width="130"/>
+                                <DataGridTextColumn Header="Priorita" Binding="{Binding Priorita}" Width="80"/>
+                                <DataGridTextColumn Header="# TK" Binding="{Binding NumeroTickets}" Width="50"/>
+                                <DataGridTextColumn Header="% Ris." Binding="{Binding PercentualeRisoluzione, StringFormat={}{0:F1}%}" Width="60"/>
+                                <DataGridTextColumn Header="TMC" Binding="{Binding TempoMedioTMCFormatted}" Width="70"/>
+                                <DataGridTextColumn Header="T-EFF" Binding="{Binding TempoMedioTEFFFormatted}" Width="70"/>
+                                <DataGridTextColumn Header="% Fuori SLA" Binding="{Binding PercentualeFuoriSLA, StringFormat={}{0:F1}%}" Width="80"/>
+                                <DataGridTextColumn Header="Valutazione" Binding="{Binding DescrizioneValutazionePriorita}" Width="110"/>
+                            </DataGrid.Columns>
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ValutazionePriorita}" Value="Critico">
+                                            <Setter Property="Background" Value="#FFEBEE"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ValutazionePriorita}" Value="Ottimo">
+                                            <Setter Property="Background" Value="#E8F5E8"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ValutazionePriorita}" Value="Migliorabile">
+                                            <Setter Property="Background" Value="#FFF3E0"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Distribuzione Priorita -->
+                    <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="DISTRIBUZIONE PRIORITA" Style="{StaticResource SectionTitleStyle}"/>
+                            <DataGrid x:Name="DistribuzionePrioritaDataGrid" AutoGenerateColumns="False" 
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      Background="Transparent" BorderThickness="0"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" 
+                                      IsReadOnly="True" SelectionMode="Single">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Priorita" Binding="{Binding Priorita}" Width="80"/>
+                                    <DataGridTextColumn Header="# Ticket" Binding="{Binding NumeroTickets}" Width="60"/>
+                                    <DataGridTextColumn Header="% Totale" Binding="{Binding Percentuale, StringFormat={}{0:F1}%}" Width="70"/>
+                                    <DataGridTextColumn Header="% Fuori SLA" Binding="{Binding PercentualeFuoriSLA, StringFormat={}{0:F1}%}" Width="80"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Top Proprietari -->
+                    <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="TOP PROPRIETARI" Style="{StaticResource SectionTitleStyle}"/>
+                            <DataGrid x:Name="TopProprietariDataGrid" AutoGenerateColumns="False" 
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      Background="Transparent" BorderThickness="0"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" 
+                                      IsReadOnly="True" SelectionMode="Single">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Proprietario" Binding="{Binding Proprietario}" Width="120"/>
+                                    <DataGridTextColumn Header="# Ticket" Binding="{Binding NumeroTickets}" Width="60"/>
+                                    <DataGridTextColumn Header="% Totale" Binding="{Binding Percentuale, StringFormat={}{0:F1}%}" Width="70"/>
+                                    <DataGridTextColumn Header="% Risolti" Binding="{Binding PercentualeRisoluzione, StringFormat={}{0:F1}%}" Width="70"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Riepilogo Esecutivo -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="RIEPILOGO ESECUTIVO" Style="{StaticResource SectionTitleStyle}"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="10">
+                                <TextBlock Text="TEMPI MEDI GLOBALI" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="TMC: " FontWeight="Bold"/>
+                                    <TextBlock x:Name="TempoMedioGlobaleTMCText" Text="00:00:00" Foreground="#FF2196F3"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="T-EFF: " FontWeight="Bold"/>
+                                    <TextBlock x:Name="TempoMedioGlobaleTEFFText" Text="00:00:00" Foreground="#FF9800"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="10">
+                                <TextBlock Text="MIGLIORI PERFORMANCE" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Migliore: " FontWeight="Bold"/>
+                                    <TextBlock x:Name="ProprietarioMiglioreText" Text="N/A" Foreground="#4CAF50"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Da migliorare: " FontWeight="Bold"/>
+                                    <TextBlock x:Name="ProprietarioCriticoText" Text="N/A" Foreground="#F44336"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="10">
+                                <TextBlock Text="PRIORITA" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Piu problematica: " FontWeight="Bold"/>
+                                    <TextBlock x:Name="PrioritaProblematicaText" Text="N/A" Foreground="#F44336"/>
+                                    <TextBlock Text=" | Meno problematica: " FontWeight="Bold" Margin="20,0,0,0"/>
+                                    <TextBlock x:Name="PrioritaMenoProblematicaText" Text="N/A" Foreground="#4CAF50"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="2" Background="#EEEEEE">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusTextBlock" Text="Report caricato"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock Text="Livello HD Service PRO - Report di Analisi"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

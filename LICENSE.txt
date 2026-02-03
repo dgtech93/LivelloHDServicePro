@@ -1,0 +1,65 @@
+CONTRATTO DI LICENZA SOFTWARE
+Livello HD Service PRO
+
+Copyright (c) 2024 Livello HD. Tutti i diritti riservati.
+
+IMPORTANTE: LEGGERE ATTENTAMENTE PRIMA DELL'INSTALLAZIONE
+
+Questo Contratto di Licenza Software ("Licenza") è un accordo legale tra l'utente 
+(persona fisica o giuridica) e Livello HD per il software Livello HD Service PRO 
+("Software").
+
+INSTALLANDO, COPIANDO O UTILIZZANDO IL SOFTWARE, L'UTENTE ACCETTA DI ESSERE 
+VINCOLATO AI TERMINI DI QUESTA LICENZA. SE NON SI ACCETTANO I TERMINI, NON 
+INSTALLARE O UTILIZZARE IL SOFTWARE.
+
+1. CONCESSIONE DI LICENZA
+   Livello HD concede all'utente una licenza non esclusiva, non trasferibile per:
+   a) Installare e utilizzare il Software su un singolo computer
+   b) Effettuare una copia di backup del Software
+
+2. RESTRIZIONI
+   L'utente NON può:
+   a) Modificare, decodificare o effettuare reverse engineering del Software
+   b) Rimuovere o alterare avvisi di copyright o proprietà intellettuale
+   c) Distribuire, vendere, affittare o prestare il Software
+   d) Utilizzare il Software per scopi illegali
+
+3. PROPRIETÀ INTELLETTUALE
+   Il Software è di proprietà di Livello HD ed è protetto da leggi sul copyright 
+   e trattati internazionali. Livello HD mantiene tutti i diritti non 
+   espressamente concessi.
+
+4. GARANZIA LIMITATA
+   IL SOFTWARE È FORNITO "COSÌ COM'È" SENZA GARANZIE DI ALCUN TIPO, ESPLICITE 
+   O IMPLICITE. LIVELLO HD NON GARANTISCE CHE IL SOFTWARE SIA PRIVO DI ERRORI 
+   O CHE SODDISFI LE ESIGENZE SPECIFICHE DELL'UTENTE.
+
+5. LIMITAZIONE DI RESPONSABILITÀ
+   IN NESSUN CASO LIVELLO HD SARÀ RESPONSABILE PER DANNI DIRETTI, INDIRETTI, 
+   INCIDENTALI, SPECIALI O CONSEQUENZIALI DERIVANTI DALL'USO O IMPOSSIBILITÀ 
+   DI UTILIZZO DEL SOFTWARE.
+
+6. SUPPORTO E AGGIORNAMENTI
+   Il supporto tecnico e gli aggiornamenti sono forniti a discrezione di Livello HD 
+   e possono essere soggetti a costi aggiuntivi.
+
+7. DURATA
+   Questa Licenza è efficace fino alla sua risoluzione. Si risolve automaticamente 
+   se l'utente non rispetta i termini. Alla risoluzione, l'utente deve cessare 
+   l'utilizzo e distruggere tutte le copie del Software.
+
+8. LEGGE APPLICABILE
+   Questa Licenza è regolata dalle leggi italiane. Qualsiasi controversia sarà 
+   soggetta alla giurisdizione esclusiva dei tribunali italiani.
+
+9. ACCORDO COMPLETO
+   Questa Licenza costituisce l'accordo completo tra le parti riguardo al Software 
+   e sostituisce tutti gli accordi precedenti.
+
+Per domande su questa Licenza, contattare:
+Livello HD
+Email: support@livellohd.com
+Web: www.livellohd.com
+
+DATA ULTIMA MODIFICA: Gennaio 2024

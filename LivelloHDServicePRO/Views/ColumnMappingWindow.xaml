@@ -1,0 +1,63 @@
+<Window x:Class="LivelloHDServicePRO.Views.ColumnMappingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Mappatura Colonne Excel" Height="700" Width="800"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Mappa le colonne del file Excel ai campi del sistema:" 
+                   FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+        
+        <!-- Mapping Grid -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <DataGrid x:Name="MappingDataGrid" 
+                      AutoGenerateColumns="False" 
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      GridLinesVisibility="All"
+                      AlternationCount="2"
+                      AlternatingRowBackground="LightGray">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Campo Sistema" Binding="{Binding DisplayName}" 
+                                        IsReadOnly="True" Width="200"/>
+                    <DataGridTemplateColumn Header="Colonna Excel" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox SelectedValuePath="Index" 
+                                          DisplayMemberPath="DisplayText" 
+                                          SelectedValue="{Binding ExcelColumnIndex, UpdateSourceTrigger=PropertyChanged}"
+                                          ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ExcelColumnsWithNone}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridCheckBoxColumn Header="Richiesto" Binding="{Binding IsRequired}" 
+                                           IsReadOnly="True" Width="80"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </ScrollViewer>
+        
+        <!-- Auto-mapping section -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10" HorizontalAlignment="Center">
+            <Button Content="Auto-Mapping" x:Name="AutoMappingButton" Width="120" Margin="5" 
+                    Click="AutoMappingButton_Click" 
+                    ToolTip="Tenta di mappare automaticamente le colonne in base al nome"/>
+            <Button Content="Reset Mapping" x:Name="ResetMappingButton" Width="120" Margin="5" 
+                    Click="ResetMappingButton_Click" 
+                    ToolTip="Resetta tutte le mappature"/>
+        </StackPanel>
+        
+        <!-- Buttons -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10">
+            <Button Content="OK" x:Name="OkButton" Width="75" Margin="5" Click="OkButton_Click" IsDefault="True"/>
+            <Button Content="Annulla" x:Name="CancelButton" Width="75" Margin="5" Click="CancelButton_Click" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

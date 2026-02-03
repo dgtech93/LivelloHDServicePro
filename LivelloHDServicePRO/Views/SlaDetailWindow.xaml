@@ -1,0 +1,230 @@
+<Window x:Class="LivelloHDServicePRO.Views.SlaDetailWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Dettaglio SLA" Height="800" Width="1100"
+    WindowStartupLocation="CenterOwner"
+    ShowInTaskbar="False"
+    Background="#F5F5F5">
+<Window.Resources>
+    <!-- Modern Button Style -->
+    <Style x:Key="ModernButtonStyle" TargetType="Button">
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="Margin" Value="8,4"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="#FF2196F3"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border" 
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="4"
+                            Padding="{TemplateBinding Padding}">
+                        <Border.Effect>
+                            <DropShadowEffect Color="Gray" Opacity="0.15" ShadowDepth="1" BlurRadius="4"/>
+                        </Border.Effect>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.85"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+        
+    <!-- Card Style for GroupBox replacement -->
+    <Style x:Key="CardStyle" TargetType="Border">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="16"/>
+        <Setter Property="Margin" Value="5"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="Gray" Opacity="0.12" ShadowDepth="1" BlurRadius="8"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+        
+    <!-- Card Header Style -->
+    <Style x:Key="CardHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="#7F8C8D"/>
+        <Setter Property="Margin" Value="0,0,0,12"/>
+    </Style>
+        
+    <!-- Style for Data Labels -->
+    <Style x:Key="DataLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="#7F8C8D"/>
+        <Setter Property="Margin" Value="5,2"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+        
+    <!-- Style for Data Values -->
+    <Style x:Key="DataValueStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="#2C3E50"/>
+        <Setter Property="Margin" Value="5,2"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="FontFamily" Value="Segoe UI"/>
+    </Style>
+        
+    <!-- Style for Calculation Results -->
+    <Style x:Key="ResultStyle" TargetType="TextBlock">
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="#1976D2"/>
+        <Setter Property="Margin" Value="5,2"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+        
+    <!-- Modern Tab Style -->
+    <Style TargetType="TabItem">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="Border" Background="White" 
+                            BorderBrush="#E0E0E0" BorderThickness="1,1,1,0" 
+                            CornerRadius="6,6,0,0" Padding="14,8" Margin="2,0">
+                        <ContentPresenter ContentSource="Header" 
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="#2196F3"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="False">
+                            <Setter Property="Foreground" Value="#7F8C8D"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</Window.Resources>
+    
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header Info -->
+        <Border Grid.Row="0" Style="{StaticResource CardStyle}">
+            <StackPanel>
+                <TextBlock Text="📊 INFORMAZIONI CASO" Style="{StaticResource CardHeaderStyle}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Numero Caso:" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" x:Name="NumeroCasoTextBlock" Style="{StaticResource DataValueStyle}" FontWeight="SemiBold"/>
+                    
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Cliente:" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="3" x:Name="ClienteTextBlock" Style="{StaticResource DataValueStyle}"/>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Titolo:" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" x:Name="TitoloTextBlock" 
+                              Style="{StaticResource DataValueStyle}" TextWrapping="Wrap"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+        
+        <!-- Date Information -->
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}">
+            <StackPanel>
+                <TextBlock Text="📅 DATE E ORARI" Style="{StaticResource CardHeaderStyle}"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Border Background="#E3F2FD" CornerRadius="4" Padding="12,6" Margin="0,0,12,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🟢 Apertura:" Style="{StaticResource DataLabelStyle}" Foreground="#1976D2"/>
+                            <TextBlock x:Name="DataAperturaTextBlock" Style="{StaticResource DataValueStyle}" 
+                                       Foreground="#1976D2" FontWeight="SemiBold" Margin="5,2,0,2"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <Border Background="#FFF3E0" CornerRadius="4" Padding="12,6" Margin="0,0,12,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📥 Presa in Carico:" Style="{StaticResource DataLabelStyle}" Foreground="#F57C00"/>
+                            <TextBlock x:Name="DataPresaInCaricoTextBlock" Style="{StaticResource DataValueStyle}" 
+                                       Foreground="#F57C00" FontWeight="SemiBold" Margin="5,2,0,2"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <Border Background="#E8F5E9" CornerRadius="4" Padding="12,6">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="✅ Chiusura:" Style="{StaticResource DataLabelStyle}" Foreground="#388E3C"/>
+                            <TextBlock x:Name="DataChiusuraTextBlock" Style="{StaticResource DataValueStyle}" 
+                                       Foreground="#388E3C" FontWeight="SemiBold" Margin="5,2,0,2"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        
+        
+        <!-- SLA Calculations -->
+        <TabControl Grid.Row="2" Margin="5" Background="Transparent" BorderThickness="0">
+            <TabItem Header="📥 TMC - Tempo Medio di Carico">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White">
+                    <StackPanel x:Name="TmcPanel" Margin="10">
+                        <!-- Content will be generated dynamically -->
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            
+            <TabItem Header="✅ TMS - Tempo Medio di Soluzione">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White">
+                    <StackPanel x:Name="TmsPanel" Margin="10">
+                        <!-- Content will be generated dynamically -->
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            
+            <TabItem Header="⏸️ TSOSP - Tempo Sospensione">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White">
+                    <StackPanel x:Name="TsospPanel" Margin="10">
+                        <!-- Content will be generated dynamically -->
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            
+            <TabItem Header="🎯 Confronto SLA">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="White">
+                    <StackPanel x:Name="SlaComparisonPanel" Margin="10">
+                        <!-- SLA Comparison content will be generated dynamically -->
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+        
+        <!-- Bottom Buttons -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10">
+            <Button Content="✓ Chiudi" x:Name="ChiudiButton" Width="100" 
+                    Style="{StaticResource ModernButtonStyle}"
+                    Click="ChiudiButton_Click" IsDefault="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
