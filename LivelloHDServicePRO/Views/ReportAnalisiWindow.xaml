@@ -172,10 +172,10 @@
                     </Border>
                 </Grid>
 
-                <!-- Analisi Proprietari -->
+                <!-- Analisi Risorse -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel>
-                        <TextBlock Text="ANALISI PROPRIETARI" Style="{StaticResource SectionTitleStyle}"/>
+                        <TextBlock Text="ANALISI RISORSE" Style="{StaticResource SectionTitleStyle}"/>
                         <DataGrid x:Name="ProprietariDataGrid" AutoGenerateColumns="False" 
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                                   Background="Transparent" BorderThickness="0"
@@ -183,31 +183,22 @@
                                   IsReadOnly="True" SelectionMode="Single"
                                   MaxHeight="300" ScrollViewer.VerticalScrollBarVisibility="Auto">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Proprietario" Binding="{Binding NomeProprietario}" Width="150"/>
+                                <DataGridTextColumn Header="Risorsa" Binding="{Binding NomeProprietario}" Width="150"/>
                                 <DataGridTextColumn Header="# Ticket" Binding="{Binding TotalTickets}" Width="70"/>
-                                <DataGridTextColumn Header="% Risoluzione" Binding="{Binding PercentualeRisoluzione, StringFormat={}{0:F1}%}" Width="90"/>
-                                <DataGridTextColumn Header="Valutazione" Binding="{Binding DescrizioneValutazione}" Width="150"/>
+                                <DataGridTextColumn Header="# Non Risolti" Binding="{Binding TicketsNonRisolti}" Width="90"/>
+                                <DataGridTextColumn Header="# Fuori SLA TMC" Binding="{Binding TicketsFuoriSLATMC}" Width="110"/>
+                                <DataGridTextColumn Header="# Fuori SLA T-EFF" Binding="{Binding TicketsFuoriSLATEFF}" Width="120"/>
+                                <DataGridTextColumn Header="# In SLA" Binding="{Binding TicketsInSLA}" Width="80"/>
                             </DataGrid.Columns>
-                            <DataGrid.RowStyle>
-                                <Style TargetType="DataGridRow">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ValutazioneComplessiva}" Value="Critico">
-                                            <Setter Property="Background" Value="#FFEBEE"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ValutazioneComplessiva}" Value="Ottimo">
-                                            <Setter Property="Background" Value="#E8F5E8"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.RowStyle>
                         </DataGrid>
                     </StackPanel>
                 </Border>
 
-                <!-- Analisi Proprietari per Priorita -->
+                <!-- Analisi Risorse per Priorita -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel>
-                        <TextBlock Text="ANALISI PROPRIETARI PER PRIORITA" Style="{StaticResource SectionTitleStyle}"/>
+                        <TextBlock Text="ANALISI RISORSE PER PRIORITA" Style="{StaticResource SectionTitleStyle}"/>
+                        <TextBlock Text="Ordinate per gravita (Critico ? Basso)" FontSize="11" Foreground="Gray" Margin="0,0,0,10"/>
                         <DataGrid x:Name="ProprietariPrioritaDataGrid" AutoGenerateColumns="False" 
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                                   Background="Transparent" BorderThickness="0"
@@ -215,26 +206,36 @@
                                   IsReadOnly="True" SelectionMode="Single"
                                   MaxHeight="400" ScrollViewer.VerticalScrollBarVisibility="Auto">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Proprietario" Binding="{Binding NomeProprietario}" Width="130"/>
-                                <DataGridTextColumn Header="Priorita" Binding="{Binding Priorita}" Width="80"/>
+                                <DataGridTextColumn Header="Livello" Binding="{Binding LivelloGravita}" Width="70">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Risorsa" Binding="{Binding NomeProprietario}" Width="130"/>
+                                <DataGridTextColumn Header="Priorita" Binding="{Binding Priorita}" Width="70"/>
                                 <DataGridTextColumn Header="# TK" Binding="{Binding NumeroTickets}" Width="50"/>
-                                <DataGridTextColumn Header="% Ris." Binding="{Binding PercentualeRisoluzione, StringFormat={}{0:F1}%}" Width="60"/>
-                                <DataGridTextColumn Header="TMC" Binding="{Binding TempoMedioTMCFormatted}" Width="70"/>
-                                <DataGridTextColumn Header="T-EFF" Binding="{Binding TempoMedioTEFFFormatted}" Width="70"/>
-                                <DataGridTextColumn Header="% Fuori SLA" Binding="{Binding PercentualeFuoriSLA, StringFormat={}{0:F1}%}" Width="80"/>
-                                <DataGridTextColumn Header="Valutazione" Binding="{Binding DescrizioneValutazionePriorita}" Width="110"/>
+                                <DataGridTextColumn Header="TMC Medio" Binding="{Binding TempoMedioTMCFormatted}" Width="80"/>
+                                <DataGridTextColumn Header="T-EFF Medio" Binding="{Binding TempoMedioTEFFFormatted}" Width="85"/>
+                                <DataGridTextColumn Header="# TMC Out" Binding="{Binding NumeroTMCFuoriSLA}" Width="75"/>
+                                <DataGridTextColumn Header="# TEFF Out" Binding="{Binding NumeroTEFFSuoriSLA}" Width="80"/>
                             </DataGrid.Columns>
                             <DataGrid.RowStyle>
                                 <Style TargetType="DataGridRow">
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ValutazionePriorita}" Value="Critico">
+                                        <DataTrigger Binding="{Binding LivelloGravita}" Value="Critico">
                                             <Setter Property="Background" Value="#FFEBEE"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding ValutazionePriorita}" Value="Ottimo">
-                                            <Setter Property="Background" Value="#E8F5E8"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ValutazionePriorita}" Value="Migliorabile">
+                                        <DataTrigger Binding="{Binding LivelloGravita}" Value="Alto">
                                             <Setter Property="Background" Value="#FFF3E0"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding LivelloGravita}" Value="Medio">
+                                            <Setter Property="Background" Value="#FFF9C4"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding LivelloGravita}" Value="Basso">
+                                            <Setter Property="Background" Value="#E8F5E9"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>

@@ -1,12 +1,12 @@
 <Window x:Class="LivelloHDServicePRO.Views.AnalisiRisorseWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LivelloHDServicePRO.Views"
-        mc:Ignorable="d"
-        Title="Analisi Dettagliata Risorse" Height="800" Width="1200"
-        WindowStartupLocation="CenterOwner" Background="WhiteSmoke">
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+xmlns:local="clr-namespace:LivelloHDServicePRO.Views"
+mc:Ignorable="d"
+Title="Analisi Dettagliata Risorse" Height="800" Width="1200"
+WindowStartupLocation="CenterOwner" WindowState="Maximized" Background="WhiteSmoke">
 
     <Window.Resources>
         <Style x:Key="CardStyle" TargetType="Border">
@@ -98,11 +98,11 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                <TextBlock x:Name="VotazioneText" Text="10/10" 
+                                <TextBlock x:Name="VotazioneText" Text="100/100" 
                                           FontSize="48" FontWeight="Bold" 
                                           HorizontalAlignment="Center" Foreground="#FF9C27B0"/>
-                                <TextBlock Text="VALUTAZIONE" FontSize="12" 
-                                          HorizontalAlignment="Center" Foreground="Gray"/>
+                                <TextBlock Text="VALUTAZIONE TOTALE" FontSize="12" 
+                                          HorizontalAlignment="Center" Foreground="Gray" Margin="0,0,0,5"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" HorizontalAlignment="Center">
@@ -121,6 +121,109 @@
                                           HorizontalAlignment="Center" Foreground="Gray"/>
                             </StackPanel>
                         </Grid>
+                    </Border>
+                    
+                    <!-- Dettaglio Punteggi per Categoria -->
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="DETTAGLIO PUNTEGGI" Style="{StaticResource SectionTitleStyle}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Colonna Sinistra -->
+                                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                    <!-- TMC rispetto a SLA -->
+                                    <Border Background="#E3F2FD" CornerRadius="4" Padding="10,8" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="TMC rispetto a SLA" FontSize="11" FontWeight="SemiBold" 
+                                                       Foreground="#1976D2" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" x:Name="PunteggioTMCText" Text="20/20" 
+                                                       FontSize="14" FontWeight="Bold" Foreground="#1976D2" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- T-EFF rispetto a SLA -->
+                                    <Border Background="#E8F5E9" CornerRadius="4" Padding="10,8" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="T-EFF rispetto a SLA" FontSize="11" FontWeight="SemiBold" 
+                                                       Foreground="#388E3C" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" x:Name="PunteggioTEFFText" Text="20/20" 
+                                                       FontSize="14" FontWeight="Bold" Foreground="#388E3C" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Valutazione Tempi Medi -->
+                                    <Border Background="#FFF3E0" CornerRadius="4" Padding="10,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Valutazione Tempi Medi" FontSize="11" FontWeight="SemiBold" 
+                                                       Foreground="#F57C00" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" x:Name="PunteggioTempiMediText" Text="20/20" 
+                                                       FontSize="14" FontWeight="Bold" Foreground="#F57C00" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                                
+                                <!-- Colonna Destra -->
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                    <!-- Tasso Risoluzione -->
+                                    <Border Background="#F3E5F5" CornerRadius="4" Padding="10,8" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Tasso Risoluzione" FontSize="11" FontWeight="SemiBold" 
+                                                       Foreground="#7B1FA2" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" x:Name="PunteggioRisoluzioneText" Text="20/20" 
+                                                       FontSize="14" FontWeight="Bold" Foreground="#7B1FA2" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Volume Ticket Gestiti -->
+                                    <Border Background="#FCE4EC" CornerRadius="4" Padding="10,8" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Volume Ticket Gestiti" FontSize="11" FontWeight="SemiBold" 
+                                                       Foreground="#C2185B" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" x:Name="PunteggioVolumeText" Text="20/20" 
+                                                       FontSize="14" FontWeight="Bold" Foreground="#C2185B" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Totale Riassuntivo -->
+                                    <Border Background="#EDE7F6" CornerRadius="4" Padding="10,8" BorderBrush="#9C27B0" BorderThickness="2">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="TOTALE" FontSize="12" FontWeight="Bold" 
+                                                       Foreground="#6A1B9A" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" x:Name="PunteggioTotaleRiepilogoText" Text="100/100" 
+                                                       FontSize="16" FontWeight="Bold" Foreground="#6A1B9A" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
                     </Border>
 
                     <!-- Sintesi Analitica -->
@@ -236,6 +339,27 @@
                             </ItemsControl>
                             <TextBlock x:Name="NoSuggerimentiText" Text="Nessun suggerimento disponibile." 
                                        Foreground="Gray" Visibility="Collapsed"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Ticket Fuori SLA -->
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="TICKET FUORI SLA" Style="{StaticResource SectionTitleStyle}"/>
+                            <TextBlock x:Name="TicketFuoriSlaCount" Text="Totale: 0" 
+                                       FontSize="11" Foreground="#F44336" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <DataGrid x:Name="TicketFuoriSlaDataGrid" AutoGenerateColumns="False" 
+                                      HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                      Background="Transparent" BorderThickness="0"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" 
+                                      IsReadOnly="True" SelectionMode="Single" MaxHeight="300">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Numero Caso" Binding="{Binding NumeroCaso}" Width="150"/>
+                                    <DataGridTextColumn Header="TMC" Binding="{Binding TMCFuoriSLA}" Width="150"/>
+                                    <DataGridTextColumn Header="T-EFF" Binding="{Binding TEFFFuoriSLA}" Width="150"/>
+                                    <DataGridTextColumn Header="Priorita" Binding="{Binding Priorita}" Width="100"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </StackPanel>
                     </Border>
 

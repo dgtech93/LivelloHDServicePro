@@ -4,6 +4,85 @@ Tutte le modifiche importanti a questo progetto saranno documentate in questo fi
 
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.2] - 2024-12-XX
+
+### ?? Corretto
+- **BUGFIX CRITICO**: "Analisi Risorse per Priorità" ora calcola correttamente le medie
+  - Fix: I tempi medi ora vengono calcolati SOLO su valori validi (> TimeSpan.Zero)
+  - Fix: Filtro corretto per evitare dati non veritieri
+  - Aggiunto **Indice di Gravità** per identificare situazioni critiche
+  - **Ordinamento**: Prima i casi più gravi (alto volume + tempi alti + % fuori SLA)
+  - **Colorazione righe**:
+    - ?? **Rosso** (Critico): IndiceGravità > 10000 O T-EFF > 500h + >50% fuori SLA
+    - ?? **Arancione** (Alto): IndiceGravità > 5000 O T-EFF > 200h O >70% fuori SLA
+    - ?? **Giallo** (Medio): IndiceGravità > 1000 O T-EFF > 50h O >30% fuori SLA
+    - ?? **Verde** (Basso): Sotto controllo
+  - Nuova colonna "Livello" per immediata identificazione criticità
+  
+- **BUGFIX PDF**: Esportazione PDF Report completo ora aggiornata
+- **"Analisi Proprietari" ? "Analisi Risorse"**
+  - Rimossa colonna "Valutazione"
+  - Nuove colonne: # Non Risolti, # TMC Out, # TEFF Out, # In SLA
+  - **TUTTE le risorse** incluse nel PDF (non più solo TOP 15)
+  - Contatore totale risorse nel titolo
+- **"Analisi Proprietari per Priorità" ? "Analisi Risorse per Priorità"**
+  - Rimossa colonna "Valutazione"
+  - Nuova colonna "Livello" (Critico/Alto/Medio/Basso)
+  - Colorazione righe per gravità (rosso ? verde)
+  - Bold per righe "Critico"
+  - Nuove colonne: # TMC Out, # TEFF Out
+  - **TUTTE le combinazioni** incluse nel PDF (non più solo TOP 20)
+  - Contatore totale combinazioni nel titolo
+- Sottotitolo "Ordinate per gravità (Critico ? Basso)"
+  
+- **BUGFIX PDF**: Esportazione PDF AnalisiRisorse ora aggiornata con nuovi dati
+  - Aggiunto dettaglio punteggi (5 categorie × 20 punti)
+  - Aggiunta sezione "TICKET FUORI SLA" con tabella dettagliata (max 20)
+  - Formattazione migliorata e colori aggiornati
+
+### ? Aggiunto
+- **AnalisiRisorseWindow**: Aggiunta sezione "TICKET FUORI SLA" con lista dettagliata
+  - Mostra Numero Caso, TMC, T-EFF e Priorità per ogni ticket fuori SLA
+  - Contatore totale ticket fuori SLA per risorsa
+- **AnalisiRisorseWindow**: Sezione "DETTAGLIO PUNTEGGI" con breakdown per categoria
+  - Visualizza i 5 punteggi parziali (TMC, T-EFF, Tempi Medi, Risoluzione, Volume)
+  - Card colorate per ogni categoria con punteggio X/20
+
+### ?? Modificato
+- **AnalisiRisorseWindow**: Finestra ora si apre a **tutto schermo** (WindowState="Maximized")
+- **Sistema di Valutazione Risorse**: Completamente rivisto con punteggio **su 100 punti**
+  
+  **Formula di Valutazione (5 Categorie × 20 punti)**:
+  
+  1. **TMC rispetto a SLA** (20 punti)
+  2. **T-EFF rispetto a SLA** (20 punti)
+  3. **Valutazione Tempi Medi** (20 punti)
+  4. **Tasso Risoluzione** (20 punti)
+  5. **Volume Ticket Gestiti** (20 punti)
+
+- **ReportAnalisiWindow**: Semplificato e focalizzato sui dati concreti
+  - ? **Rimosso**: Tutte le colonne di valutazione/punteggi
+  - ? **Mantenuto**: Tempi Medi, Performance SLA, Distribuzione, Top Proprietari, Riepilogo
+  - ?? **"Analisi Proprietari" ? "Analisi Risorse"**:
+    - # Ticket totali
+    - # Non Risolti (stato ? Risolto)
+    - # Fuori SLA TMC
+    - # Fuori SLA T-EFF  
+    - # In SLA (entrambi TMC e T-EFF entro SLA)
+  - ?? **"Analisi Proprietari per Priorità" ? "Analisi Risorse per Priorità"**:
+    - Risorsa + Priorità
+    - TMC Medio / T-EFF Medio
+    - # TMC Fuori SLA
+    - # T-EFF Fuori SLA
+
+### ?? Migliorato
+- Report più focalizzato su metriche concrete e quantificabili
+- Rimozione di valutazioni soggettive in favore di dati oggettivi
+- Migliore chiarezza con conteggi separati per TMC e T-EFF fuori SLA
+- AnalisiRisorse mantiene sistema dettagliato di valutazione per analisi approfondita
+
+---
+
 ## [1.1.1] - 2024-12-XX
 
 ### ?? Corretto

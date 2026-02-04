@@ -53,6 +53,14 @@ namespace LivelloHDServicePRO.Views
             TicketTotaliText.Text = risorsa.TicketTotali.ToString();
             PercentualeRisoluzioneText.Text = $"{risorsa.PercentualeRisoluzione:F1}%";
             
+            // Punteggi dettagliati per categoria
+            PunteggioTMCText.Text = $"{risorsa.PunteggioTMC:F1}/20";
+            PunteggioTEFFText.Text = $"{risorsa.PunteggioTEFF:F1}/20";
+            PunteggioTempiMediText.Text = $"{risorsa.PunteggioTempiMedi:F1}/20";
+            PunteggioRisoluzioneText.Text = $"{risorsa.PunteggioRisoluzione:F1}/20";
+            PunteggioVolumeText.Text = $"{risorsa.PunteggioVolume:F1}/20";
+            PunteggioTotaleRiepilogoText.Text = $"{risorsa.PunteggioTotale:F1}/100";
+            
             // Sintesi analitica
             SintesiText.Text = !string.IsNullOrEmpty(risorsa.SintesiAnalitica) 
                 ? risorsa.SintesiAnalitica 
@@ -127,6 +135,18 @@ namespace LivelloHDServicePRO.Views
             
             // Distribuzione priorità
             PrioritaDataGrid.ItemsSource = risorsa.TicketsPerPriorita.ToList();
+            
+            // Ticket Fuori SLA
+            if (risorsa.ListaTicketFuoriSLA.Any())
+            {
+                TicketFuoriSlaCount.Text = $"Totale: {risorsa.ListaTicketFuoriSLA.Count} ticket fuori SLA";
+                TicketFuoriSlaDataGrid.ItemsSource = risorsa.ListaTicketFuoriSLA;
+            }
+            else
+            {
+                TicketFuoriSlaCount.Text = "Nessun ticket fuori SLA";
+                TicketFuoriSlaDataGrid.ItemsSource = null;
+            }
             
             // Tendenze mensili
             TendenzeDataGrid.ItemsSource = risorsa.TendenzeMensili;

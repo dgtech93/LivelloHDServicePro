@@ -70,7 +70,13 @@ namespace LivelloHDServicePRO.Models
         public string NomeProprietario { get; set; } = string.Empty;
         public int TotalTickets { get; set; }
         public int TicketsRisolti { get; set; }
+        public int TicketsNonRisolti => TotalTickets - TicketsRisolti;
         public double PercentualeRisoluzione => TotalTickets > 0 ? (double)TicketsRisolti / TotalTickets * 100 : 0;
+        
+        // Nuovi campi per SLA
+        public int TicketsFuoriSLATMC { get; set; }
+        public int TicketsFuoriSLATEFF { get; set; }
+        public int TicketsInSLA { get; set; }
         
         // Tempi medi per priorità
         public Dictionary<string, TempiProprietario> TempiPerPriorita { get; set; } = new();
@@ -80,29 +86,18 @@ namespace LivelloHDServicePRO.Models
         public string DescrizioneValutazione => GetDescrizioneValutazione();
         public int ValutazioneNumerica => GetValutazioneNumerica();
         public string ColorValutazione => GetColorValutazione();
+        
+        // Punteggio su 100
+        public double Punteggio { get; set; } = 0;
 
         private string GetDescrizioneValutazione()
         {
-            return ValutazioneComplessiva switch
-            {
-                ValutazioneQualita.Ottimo => "10 su 10",
-                ValutazioneQualita.Discreto => "7 su 10", 
-                ValutazioneQualita.Migliorabile => "4 su 10",
-                ValutazioneQualita.Critico => "1 su 10",
-                _ => "N/A"
-            };
+            return $"{(int)Math.Round(Punteggio)}/100";
         }
 
         private int GetValutazioneNumerica()
         {
-            return ValutazioneComplessiva switch
-            {
-                ValutazioneQualita.Ottimo => 10,
-                ValutazioneQualita.Discreto => 7, 
-                ValutazioneQualita.Migliorabile => 4,
-                ValutazioneQualita.Critico => 1,
-                _ => 0
-            };
+            return (int)Math.Round(Punteggio);
         }
 
         private string GetColorValutazione()
@@ -141,11 +136,22 @@ namespace LivelloHDServicePRO.Models
         public string TempoMedioTEFFFormatted => FormatTimeSpan(TempoMedioTEFF);
         public string TempoMedioTSOSPFormatted => FormatTimeSpan(TempoMedioTSOSP);
         
+        // Nuovi campi per conteggio fuori SLA
+        public int NumeroTMCFuoriSLA { get; set; }
+        public int NumeroTEFFSuoriSLA { get; set; }
+        
+        // Indice di gravità per ordinamento (alto = critico)
+        public double IndiceGravita { get; set; }
+        public string LivelloGravita { get; set; } = string.Empty; // "Critico", "Alto", "Medio", "Basso"
+        
         // Valutazione specifica per questa priorità
         public ValutazioneQualita ValutazionePriorita { get; set; }
         public string DescrizioneValutazionePriorita => GetDescrizioneValutazionePriorita();
         public int ValutazioneNumerica => GetValutazioneNumerica();
         public string ColorValutazionePriorita => GetColorValutazionePriorita();
+        
+        // Punteggio su 100
+        public double Punteggio { get; set; } = 0;
         
         // SLA Performance per questa combinazione
         public int TicketsFuoriSLA { get; set; }
@@ -159,26 +165,12 @@ namespace LivelloHDServicePRO.Models
 
         private string GetDescrizioneValutazionePriorita()
         {
-            return ValutazionePriorita switch
-            {
-                ValutazioneQualita.Ottimo => "10 su 10",
-                ValutazioneQualita.Discreto => "7 su 10", 
-                ValutazioneQualita.Migliorabile => "4 su 10",
-                ValutazioneQualita.Critico => "1 su 10",
-                _ => "N/A"
-            };
+            return $"{(int)Math.Round(Punteggio)}/100";
         }
 
         private int GetValutazioneNumerica()
         {
-            return ValutazionePriorita switch
-            {
-                ValutazioneQualita.Ottimo => 10,
-                ValutazioneQualita.Discreto => 7, 
-                ValutazioneQualita.Migliorabile => 4,
-                ValutazioneQualita.Critico => 1,
-                _ => 0
-            };
+            return (int)Math.Round(Punteggio);
         }
 
         private string GetColorValutazionePriorita()
@@ -219,6 +211,9 @@ namespace LivelloHDServicePRO.Models
         public double PercentualeEntroSLA => TicketTotali > 0 ? (double)TicketsEntroSLA / TicketTotali * 100 : 0;
         public double PercentualeFuoriSLA => TicketTotali > 0 ? (double)TicketsFuoriSLA / TicketTotali * 100 : 0;
         
+        // Lista ticket fuori SLA
+        public List<SlaRecord> ListaTicketFuoriSLA { get; set; } = new();
+        
         // Distribuzione per priorità
         public Dictionary<string, int> TicketsPerPriorita { get; set; } = new();
         public string PrioritaPiuGestita => GetPrioritaPiuGestita();
@@ -227,6 +222,14 @@ namespace LivelloHDServicePRO.Models
         public ValutazioneQualita ValutazioneComplessiva { get; set; }
         public int VotazioneNumerica => GetVotazioneNumerica();
         public string DescrizioneValutazione => GetDescrizioneValutazione();
+        
+        // Nuovo sistema di valutazione su 100 punti
+        public double PunteggioTotale { get; set; } // Su 100
+        public double PunteggioTMC { get; set; } // Su 20
+        public double PunteggioTEFF { get; set; } // Su 20
+        public double PunteggioTempiMedi { get; set; } // Su 20
+        public double PunteggioRisoluzione { get; set; } // Su 20
+        public double PunteggioVolume { get; set; } // Su 20
         
         // Tendenze mensili (ultimi 3 mesi se disponibili)
         public List<TendenzaMensile> TendenzeMensili { get; set; } = new();
@@ -262,26 +265,14 @@ namespace LivelloHDServicePRO.Models
 
         private int GetVotazioneNumerica()
         {
-            return ValutazioneComplessiva switch
-            {
-                ValutazioneQualita.Ottimo => 10,
-                ValutazioneQualita.Discreto => 7,
-                ValutazioneQualita.Migliorabile => 4,
-                ValutazioneQualita.Critico => 1,
-                _ => 0
-            };
+            // Ora basato su punteggio su 100
+            return (int)Math.Round(PunteggioTotale);
         }
 
         private string GetDescrizioneValutazione()
         {
-            return ValutazioneComplessiva switch
-            {
-                ValutazioneQualita.Ottimo => "10 su 10 - Eccellente",
-                ValutazioneQualita.Discreto => "7 su 10 - Buono",
-                ValutazioneQualita.Migliorabile => "4 su 10 - Da migliorare",
-                ValutazioneQualita.Critico => "1 su 10 - Critico",
-                _ => "N/A"
-            };
+            var punteggio = (int)Math.Round(PunteggioTotale);
+            return $"{punteggio}/100";
         }
     }
 

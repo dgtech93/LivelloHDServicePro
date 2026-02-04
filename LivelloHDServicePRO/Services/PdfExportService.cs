@@ -479,7 +479,8 @@ namespace LivelloHDServicePRO.Services
 
             container.Column(column =>
             {
-                column.Item().Text("ANALISI PROPRIETARI (TOP 15)").FontSize(14).SemiBold().FontColor(Colors.Blue.Medium);
+                column.Item().Text("ANALISI RISORSE").FontSize(14).SemiBold().FontColor(Colors.Blue.Medium);
+                column.Item().Text($"Totale risorse: {_reportData.AnalisiProprietari.Count}").FontSize(9).FontColor(Colors.Grey.Darken1);
                 
                 column.Item().PaddingTop(5).Table(table =>
                 {
@@ -489,24 +490,30 @@ namespace LivelloHDServicePRO.Services
                         columns.RelativeColumn();
                         columns.RelativeColumn();
                         columns.RelativeColumn();
+                        columns.RelativeColumn();
+                        columns.RelativeColumn();
                     });
 
                     // Header
                     table.Header(header =>
                     {
-                        header.Cell().Element(HeaderCell).Text("Proprietario");
+                        header.Cell().Element(HeaderCell).Text("Risorsa");
                         header.Cell().Element(HeaderCell).Text("# Ticket");
-                        header.Cell().Element(HeaderCell).Text("% Risoluzione");
-                        header.Cell().Element(HeaderCell).Text("Valutazione");
+                        header.Cell().Element(HeaderCell).Text("# Non Risolti");
+                        header.Cell().Element(HeaderCell).Text("# TMC Out");
+                        header.Cell().Element(HeaderCell).Text("# TEFF Out");
+                        header.Cell().Element(HeaderCell).Text("# In SLA");
                     });
 
-                    // Dati
-                    foreach (var item in _reportData.AnalisiProprietari.Take(15))
+                    // Dati - TUTTI, non solo top 15
+                    foreach (var item in _reportData.AnalisiProprietari)
                     {
-                        table.Cell().Element(DataCell).Text(SanitizeText(item.NomeProprietario));
-                        table.Cell().Element(DataCell).Text(item.TotalTickets.ToString());
-                        table.Cell().Element(DataCell).Text($"{item.PercentualeRisoluzione:F1}%");
-                        table.Cell().Element(DataCell).Text(SanitizeText(item.DescrizioneValutazione));
+                        table.Cell().Element(DataCell).Text(SanitizeText(item.NomeProprietario)).FontSize(8);
+                        table.Cell().Element(DataCell).Text(item.TotalTickets.ToString()).FontSize(8);
+                        table.Cell().Element(DataCell).Text(item.TicketsNonRisolti.ToString()).FontSize(8);
+                        table.Cell().Element(DataCell).Text(item.TicketsFuoriSLATMC.ToString()).FontSize(8);
+                        table.Cell().Element(DataCell).Text(item.TicketsFuoriSLATEFF.ToString()).FontSize(8);
+                        table.Cell().Element(DataCell).Text(item.TicketsInSLA.ToString()).FontSize(8);
                     }
                 });
             });
@@ -518,16 +525,19 @@ namespace LivelloHDServicePRO.Services
 
             container.Column(column =>
             {
-                column.Item().Text("ANALISI PROPRIETARI PER PRIORITA (TOP 20)").FontSize(14).SemiBold().FontColor(Colors.Blue.Medium);
+                column.Item().Text("ANALISI RISORSE PER PRIORITA").FontSize(14).SemiBold().FontColor(Colors.Blue.Medium);
+                column.Item().Text("Ordinate per gravita (Critico ? Basso)").FontSize(9).FontColor(Colors.Grey.Darken1);
+                column.Item().Text($"Totale combinazioni: {_reportData.AnalisiProprietariPerPriorita.Count}").FontSize(9).FontColor(Colors.Grey.Darken1);
                 
                 column.Item().PaddingTop(5).Table(table =>
                 {
                     table.ColumnsDefinition(columns =>
                     {
+                        columns.RelativeColumn();
                         columns.RelativeColumn(2);
                         columns.RelativeColumn();
-                        columns.RelativeColumn(0.8f);
-                        columns.RelativeColumn(0.8f);
+                        columns.RelativeColumn(0.7f);
+                        columns.RelativeColumn();
                         columns.RelativeColumn();
                         columns.RelativeColumn();
                         columns.RelativeColumn();
@@ -536,25 +546,78 @@ namespace LivelloHDServicePRO.Services
                     // Header
                     table.Header(header =>
                     {
-                        header.Cell().Element(HeaderCell).Text("Proprietario");
+                        header.Cell().Element(HeaderCell).Text("Livello");
+                        header.Cell().Element(HeaderCell).Text("Risorsa");
                         header.Cell().Element(HeaderCell).Text("Priorita");
                         header.Cell().Element(HeaderCell).Text("# TK");
-                        header.Cell().Element(HeaderCell).Text("% Ris.");
                         header.Cell().Element(HeaderCell).Text("TMC");
                         header.Cell().Element(HeaderCell).Text("T-EFF");
-                        header.Cell().Element(HeaderCell).Text("Valutazione");
+                        header.Cell().Element(HeaderCell).Text("# TMC Out");
+                        header.Cell().Element(HeaderCell).Text("# TEFF Out");
                     });
 
-                    // Dati
-                    foreach (var item in _reportData.AnalisiProprietariPerPriorita.Take(20))
+                    // Dati con colorazione per livello gravità - TUTTI, non solo top 20
+                    foreach (var item in _reportData.AnalisiProprietariPerPriorita)
                     {
-                        table.Cell().Element(DataCell).Text(SanitizeText(item.NomeProprietario)).FontSize(8);
-                        table.Cell().Element(DataCell).Text(SanitizeText(item.Priorita)).FontSize(8);
-                        table.Cell().Element(DataCell).Text(item.NumeroTickets.ToString()).FontSize(8);
-                        table.Cell().Element(DataCell).Text($"{item.PercentualeRisoluzione:F1}%").FontSize(8);
-                        table.Cell().Element(DataCell).Text(item.TempoMedioTMCFormatted).FontSize(8);
-                        table.Cell().Element(DataCell).Text(item.TempoMedioTEFFFormatted).FontSize(8);
-                        table.Cell().Element(DataCell).Text(SanitizeText(item.DescrizioneValutazionePriorita)).FontSize(8);
+                        // Determina colore background in base al livello
+                        var backgroundColor = item.LivelloGravita switch
+                        {
+                            "Critico" => "#FFEBEE",
+                            "Alto" => "#FFF3E0",
+                            "Medio" => "#FFF9C4",
+                            "Basso" => "#E8F5E9",
+                            _ => "#FFFFFF"
+                        };
+                        
+                        var isBold = item.LivelloGravita == "Critico";
+                        
+                        // Livello
+                        if (isBold)
+                            table.Cell().Background(backgroundColor).Padding(3).Text(SanitizeText(item.LivelloGravita)).FontSize(7).Bold();
+                        else
+                            table.Cell().Background(backgroundColor).Padding(3).Text(SanitizeText(item.LivelloGravita)).FontSize(7);
+                        
+                        // Risorsa
+                        if (isBold)
+                            table.Cell().Background(backgroundColor).Padding(3).Text(SanitizeText(item.NomeProprietario)).FontSize(7).Bold();
+                        else
+                            table.Cell().Background(backgroundColor).Padding(3).Text(SanitizeText(item.NomeProprietario)).FontSize(7);
+                        
+                        // Priorita
+                        if (isBold)
+                            table.Cell().Background(backgroundColor).Padding(3).Text(SanitizeText(item.Priorita)).FontSize(7).Bold();
+                        else
+                            table.Cell().Background(backgroundColor).Padding(3).Text(SanitizeText(item.Priorita)).FontSize(7);
+                        
+                        // # TK
+                        if (isBold)
+                            table.Cell().Background(backgroundColor).Padding(3).Text(item.NumeroTickets.ToString()).FontSize(7).Bold();
+                        else
+                            table.Cell().Background(backgroundColor).Padding(3).Text(item.NumeroTickets.ToString()).FontSize(7);
+                        
+                        // TMC
+                        if (isBold)
+                            table.Cell().Background(backgroundColor).Padding(3).Text(item.TempoMedioTMCFormatted).FontSize(7).Bold();
+                        else
+                            table.Cell().Background(backgroundColor).Padding(3).Text(item.TempoMedioTMCFormatted).FontSize(7);
+                        
+                        // T-EFF
+                        if (isBold)
+                            table.Cell().Background(backgroundColor).Padding(3).Text(item.TempoMedioTEFFFormatted).FontSize(7).Bold();
+                        else
+                            table.Cell().Background(backgroundColor).Padding(3).Text(item.TempoMedioTEFFFormatted).FontSize(7);
+                        
+                        // # TMC Out
+                        if (isBold)
+                            table.Cell().Background(backgroundColor).Padding(3).Text(item.NumeroTMCFuoriSLA.ToString()).FontSize(7).Bold();
+                        else
+                            table.Cell().Background(backgroundColor).Padding(3).Text(item.NumeroTMCFuoriSLA.ToString()).FontSize(7);
+                        
+                        // # TEFF Out
+                        if (isBold)
+                            table.Cell().Background(backgroundColor).Padding(3).Text(item.NumeroTEFFSuoriSLA.ToString()).FontSize(7).Bold();
+                        else
+                            table.Cell().Background(backgroundColor).Padding(3).Text(item.NumeroTEFFSuoriSLA.ToString()).FontSize(7);
                     }
                 });
             });
@@ -802,6 +865,13 @@ namespace LivelloHDServicePRO.Services
                     column.Item().Element(ComposeSuggerimenti);
                     column.Item().PaddingVertical(5);
                 }
+                
+                // Ticket Fuori SLA (NUOVO)
+                if (_risorsa.ListaTicketFuoriSLA?.Any() == true)
+                {
+                    column.Item().Element(ComposeTicketFuoriSLA);
+                    column.Item().PaddingVertical(5);
+                }
 
                 // Distribuzione priorita
                 column.Item().Element(ComposeDistribuzionePriorita);
@@ -826,8 +896,8 @@ namespace LivelloHDServicePRO.Services
                 {
                     row.RelativeItem().Column(col =>
                     {
-                        col.Item().Text("Valutazione:").Bold();
-                        col.Item().Text(_risorsa.DescrizioneValutazione);
+                        col.Item().Text("Valutazione Totale:").Bold();
+                        col.Item().Text(_risorsa.DescrizioneValutazione).FontSize(14).FontColor("#9C27B0");
                     });
 
                     row.RelativeItem().Column(col =>
@@ -846,6 +916,55 @@ namespace LivelloHDServicePRO.Services
                     {
                         col.Item().Text("Posizione:").Bold();
                         col.Item().Text(_risorsa.PosizioneRelativa);
+                    });
+                });
+                
+                // DETTAGLIO PUNTEGGI (NUOVO)
+                column.Item().PaddingVertical(5);
+                column.Item().Text("DETTAGLIO PUNTEGGI").FontSize(11).Bold().FontColor("#9C27B0");
+                column.Item().PaddingVertical(2);
+                
+                column.Item().Row(row =>
+                {
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("TMC rispetto a SLA:").FontSize(9);
+                        col.Item().Text($"{_risorsa.PunteggioTMC:F1}/20").FontSize(10).Bold().FontColor("#1976D2");
+                    });
+                    
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("T-EFF rispetto a SLA:").FontSize(9);
+                        col.Item().Text($"{_risorsa.PunteggioTEFF:F1}/20").FontSize(10).Bold().FontColor("#388E3C");
+                    });
+                    
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("Valutazione Tempi Medi:").FontSize(9);
+                        col.Item().Text($"{_risorsa.PunteggioTempiMedi:F1}/20").FontSize(10).Bold().FontColor("#F57C00");
+                    });
+                });
+                
+                column.Item().PaddingVertical(2);
+                
+                column.Item().Row(row =>
+                {
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("Tasso Risoluzione:").FontSize(9);
+                        col.Item().Text($"{_risorsa.PunteggioRisoluzione:F1}/20").FontSize(10).Bold().FontColor("#7B1FA2");
+                    });
+                    
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("Volume Ticket Gestiti:").FontSize(9);
+                        col.Item().Text($"{_risorsa.PunteggioVolume:F1}/20").FontSize(10).Bold().FontColor("#C2185B");
+                    });
+                    
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("TOTALE:").FontSize(9).Bold();
+                        col.Item().Text($"{_risorsa.PunteggioTotale:F1}/100").FontSize(11).Bold().FontColor("#6A1B9A");
                     });
                 });
             });
@@ -961,6 +1080,51 @@ namespace LivelloHDServicePRO.Services
                         row.ConstantItem(15).Text("•");
                         row.RelativeItem().Text(suggerimento);
                     });
+                }
+            });
+        }
+        
+        private void ComposeTicketFuoriSLA(IContainer container)
+        {
+            container.Column(column =>
+            {
+                column.Item().Text("TICKET FUORI SLA").FontSize(12).Bold().FontColor("#F44336");
+                column.Item().PaddingVertical(3);
+                column.Item().Text($"Totale: {_risorsa.ListaTicketFuoriSLA.Count} ticket fuori SLA").FontSize(9).FontColor("#F44336");
+                column.Item().PaddingVertical(2);
+
+                column.Item().Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(1);
+                    });
+
+                    table.Header(header =>
+                    {
+                        header.Cell().Background("#FFEBEE").Padding(5).Text("Numero Caso").Bold().FontSize(9);
+                        header.Cell().Background("#FFEBEE").Padding(5).Text("TMC").Bold().FontSize(9);
+                        header.Cell().Background("#FFEBEE").Padding(5).Text("T-EFF").Bold().FontSize(9);
+                        header.Cell().Background("#FFEBEE").Padding(5).Text("Priorita").Bold().FontSize(9);
+                    });
+
+                    // Mostra massimo 20 ticket per non sovraccaricare il PDF
+                    foreach (var ticket in _risorsa.ListaTicketFuoriSLA.Take(20))
+                    {
+                        table.Cell().BorderBottom(1).BorderColor("#E0E0E0").Padding(4).Text(ticket.NumeroCaso ?? "N/A").FontSize(8);
+                        table.Cell().BorderBottom(1).BorderColor("#E0E0E0").Padding(4).Text(ticket.TMCFuoriSLA ?? "N/A").FontSize(8);
+                        table.Cell().BorderBottom(1).BorderColor("#E0E0E0").Padding(4).Text(ticket.TEFFFuoriSLA ?? "N/A").FontSize(8);
+                        table.Cell().BorderBottom(1).BorderColor("#E0E0E0").Padding(4).Text(ticket.Priorita ?? "N/A").FontSize(8);
+                    }
+                });
+                
+                if (_risorsa.ListaTicketFuoriSLA.Count > 20)
+                {
+                    column.Item().PaddingVertical(2);
+                    column.Item().Text($"Visualizzati i primi 20 ticket su {_risorsa.ListaTicketFuoriSLA.Count} totali").FontSize(8).Italic().FontColor("#757575");
                 }
             });
         }

@@ -91,16 +91,35 @@ namespace LivelloHDServicePRO.Services
             return records
                 .Where(r => !string.IsNullOrEmpty(r.Proprietario))
                 .GroupBy(r => r.Proprietario!)
-                .Select(g => new AnalisiProprietario
-                {
-                    NomeProprietario = g.Key,
-                    TotalTickets = g.Count(),
-                    TicketsRisolti = g.Count(r => r.DataChiusura.HasValue),
-                    TempiPerPriorita = CalcolaTempiProprietarioPerPriorita(g.ToList()),
-                    ValutazioneComplessiva = ValutaProprietario(g.ToList(), slaSetup)
+                .Select(g => {
+                    var ticketsProprietario = g.ToList();
+                    
+                    // Conta ticket fuori SLA per TMC e T-EFF
+                    var ticketsFuoriSLATMC = ticketsProprietario.Count(t => IsFuoriSLA(t.TMCFuoriSLA));
+                    var ticketsFuoriSLATEFF = ticketsProprietario.Count(t => IsFuoriSLA(t.TEFFFuoriSLA));
+                    
+                    // Conta ticket in SLA (entrambi TMC e T-EFF entro SLA)
+                    var ticketsInSLA = ticketsProprietario.Count(t => 
+                        !IsFuoriSLA(t.TMCFuoriSLA) && !IsFuoriSLA(t.TEFFFuoriSLA));
+                    
+                    var analisi = new AnalisiProprietario
+                    {
+                        NomeProprietario = g.Key,
+                        TotalTickets = ticketsProprietario.Count,
+                        TicketsRisolti = ticketsProprietario.Count(r => r.DataChiusura.HasValue),
+                        TempiPerPriorita = CalcolaTempiProprietarioPerPriorita(ticketsProprietario),
+                        TicketsFuoriSLATMC = ticketsFuoriSLATMC,
+                        TicketsFuoriSLATEFF = ticketsFuoriSLATEFF,
+                        TicketsInSLA = ticketsInSLA
+                    };
+                    
+                    // Calcola punteggio su 100
+                    analisi.Punteggio = CalcolaPunteggioProprietario(ticketsProprietario, slaSetup);
+                    analisi.ValutazioneComplessiva = DeterminaValutazioneQualitativa(analisi.Punteggio);
+                    
+                    return analisi;
                 })
-                .OrderByDescending(p => p.ValutazioneNumerica) // Prima i migliori
-                .ThenByDescending(p => p.TotalTickets) // Poi per volume
+                .OrderByDescending(p => p.TotalTickets) // Ordina per numero ticket
                 .ToList();
         }
 
@@ -108,56 +127,86 @@ namespace LivelloHDServicePRO.Services
         {
             var slaSetup = CaricaSlaSetup(clienteSetup);
 
-            return records
+            var risultati = records
                 .Where(r => !string.IsNullOrEmpty(r.Proprietario) && !string.IsNullOrEmpty(r.Priorita))
                 .GroupBy(r => new { r.Proprietario, r.Priorita })
-                .Select(g => new AnalisiProprietarioPriorita
-                {
-                    NomeProprietario = g.Key.Proprietario!,
-                    Priorita = g.Key.Priorita!,
-                    NumeroTickets = g.Count(),
-                    TicketsRisolti = g.Count(r => r.DataChiusura.HasValue),
-                    TempoMedioTMC = CalcolaTempoMedio(g, r => r.TmcTimeSpan),
-                    TempoMedioTMS = CalcolaTempoMedio(g, r => r.TmsTimeSpan),
-                    TempoMedioTEFF = CalcolaTempoMedio(g, r => r.TeffTimeSpan),
-                    TempoMedioTSOSP = CalcolaTempoMedio(g, r => r.TsospTimeSpan),
-                    TicketsFuoriSLA = ContaTicketsFuoriSLA(g.ToList()),
-                    ValutazionePriorita = ValutaProprietarioPerPriorita(g.ToList(), g.Key.Priorita!, slaSetup)
+                .Select(g => {
+                    var ticketsGruppo = g.ToList();
+                    
+                    // Conta ticket fuori SLA per TMC e T-EFF
+                    var numeroTMCFuoriSLA = ticketsGruppo.Count(t => IsFuoriSLA(t.TMCFuoriSLA));
+                    var numeroTEFFSuoriSLA = ticketsGruppo.Count(t => IsFuoriSLA(t.TEFFFuoriSLA));
+                    
+                    // Calcola tempi medi SOLO su valori validi (> TimeSpan.Zero)
+                    var tempiTMCValidi = ticketsGruppo.Where(t => t.TmcTimeSpan.HasValue && t.TmcTimeSpan.Value > TimeSpan.Zero).ToList();
+                    var tempiTEFFValidi = ticketsGruppo.Where(t => t.TeffTimeSpan.HasValue && t.TeffTimeSpan.Value > TimeSpan.Zero).ToList();
+                    
+                    var tempoMedioTMC = tempiTMCValidi.Any() 
+                        ? TimeSpan.FromTicks((long)tempiTMCValidi.Average(t => t.TmcTimeSpan!.Value.Ticks))
+                        : TimeSpan.Zero;
+                    
+                    var tempoMedioTEFF = tempiTEFFValidi.Any() 
+                        ? TimeSpan.FromTicks((long)tempiTEFFValidi.Average(t => t.TeffTimeSpan!.Value.Ticks))
+                        : TimeSpan.Zero;
+                    
+                    var analisi = new AnalisiProprietarioPriorita
+                    {
+                        NomeProprietario = g.Key.Proprietario!,
+                        Priorita = g.Key.Priorita!,
+                        NumeroTickets = ticketsGruppo.Count,
+                        TicketsRisolti = ticketsGruppo.Count(r => r.DataChiusura.HasValue),
+                        TempoMedioTMC = tempoMedioTMC,
+                        TempoMedioTMS = CalcolaTempoMedio(ticketsGruppo, r => r.TmsTimeSpan),
+                        TempoMedioTEFF = tempoMedioTEFF,
+                        TempoMedioTSOSP = CalcolaTempoMedio(ticketsGruppo, r => r.TsospTimeSpan),
+                        TicketsFuoriSLA = ContaTicketsFuoriSLA(ticketsGruppo),
+                        NumeroTMCFuoriSLA = numeroTMCFuoriSLA,
+                        NumeroTEFFSuoriSLA = numeroTEFFSuoriSLA
+                    };
+                    
+                    // Calcola INDICE DI GRAVITA
+                    // Formula: (Ore T-EFF * NumeroTickets * fattore fuori SLA)
+                    var percentualeFuoriSLA = ticketsGruppo.Count > 0 
+                        ? ((double)analisi.TicketsFuoriSLA / ticketsGruppo.Count) * 100 
+                        : 0;
+                    
+                    var oreTEFF = tempoMedioTEFF.TotalHours;
+                    var fattoreFuoriSLA = 1 + (percentualeFuoriSLA / 100.0); // 1.0 se 0% fuori, 2.0 se 100% fuori
+                    
+                    analisi.IndiceGravita = oreTEFF * ticketsGruppo.Count * fattoreFuoriSLA;
+                    
+                    // Determina livello di gravità
+                    analisi.LivelloGravita = DeterminaLivelloGravita(analisi.IndiceGravita, oreTEFF, percentualeFuoriSLA);
+                    
+                    // Calcola punteggio su 100
+                    analisi.Punteggio = CalcolaPunteggioProprietarioPerPriorita(ticketsGruppo, g.Key.Priorita!, slaSetup);
+                    analisi.ValutazionePriorita = DeterminaValutazioneQualitativa(analisi.Punteggio);
+                    
+                    return analisi;
                 })
-                .OrderByDescending(p => p.ValutazioneNumerica) // Prima i migliori
-                .ThenBy(p => p.NomeProprietario) // Poi alfabetico
-                .ThenByDescending(p => p.NumeroTickets) // Infine per volume
+                .OrderByDescending(p => p.IndiceGravita) // Prima i più gravi
+                .ThenBy(p => p.NomeProprietario)
                 .ToList();
+            
+            return risultati;
         }
-
-        private ValutazioneQualita ValutaProprietarioPerPriorita(List<SlaRecord> records, string priorita, SlaSetup? slaSetup)
+        
+        private string DeterminaLivelloGravita(double indiceGravita, double oreTEFF, double percentualeFuoriSLA)
         {
-            if (slaSetup == null || !records.Any()) return ValutazioneQualita.NonValutabile;
-
-            var regola = _slaSetupService.FindRegolaByPriorita(slaSetup, priorita);
-            if (regola == null) return ValutazioneQualita.NonValutabile;
-
-            var tempoMedioTMC = CalcolaTempoMedio(records, r => r.TmcTimeSpan);
-            var tempoMedioTEFF = CalcolaTempoMedio(records, r => r.TeffTimeSpan);
-
-            // Calcola le soglie SLA (semplificato - 8 ore lavorative al giorno)
-            var sogliaTMC = TimeSpan.FromHours((regola.GiorniPresaInCarico * 8) + regola.OrePresaInCarico);
-            var sogliaTEFF = TimeSpan.FromHours((regola.GiorniRisoluzione * 8) + regola.OreRisoluzione);
-
-            var valutazioneTMC = ValutaTempo(tempoMedioTMC, sogliaTMC);
-            var valutazioneTEFF = ValutaTempo(tempoMedioTEFF, sogliaTEFF);
-
-            // Restituisce la valutazione peggiore tra TMC e T-EFF
-            if (valutazioneTMC == ValutazioneQualita.Critico || valutazioneTEFF == ValutazioneQualita.Critico) 
-                return ValutazioneQualita.Critico;
-            if (valutazioneTMC == ValutazioneQualita.Migliorabile || valutazioneTEFF == ValutazioneQualita.Migliorabile) 
-                return ValutazioneQualita.Migliorabile;
-            if (valutazioneTMC == ValutazioneQualita.Discreto || valutazioneTEFF == ValutazioneQualita.Discreto) 
-                return ValutazioneQualita.Discreto;
-            if (valutazioneTMC == ValutazioneQualita.Ottimo && valutazioneTEFF == ValutazioneQualita.Ottimo) 
-                return ValutazioneQualita.Ottimo;
-
-            return ValutazioneQualita.NonValutabile;
+            // CRITICO: Indice alto E (tempi altissimi O percentuale fuori SLA alta)
+            if (indiceGravita > 10000 || (oreTEFF > 500 && percentualeFuoriSLA > 50))
+                return "Critico";
+            
+            // ALTO: Indice medio-alto O tempi molto alti O percentuale fuori SLA elevata
+            if (indiceGravita > 5000 || oreTEFF > 200 || percentualeFuoriSLA > 70)
+                return "Alto";
+            
+            // MEDIO: Indice moderato O tempi medi O percentuale fuori SLA moderata
+            if (indiceGravita > 1000 || oreTEFF > 50 || percentualeFuoriSLA > 30)
+                return "Medio";
+            
+            // BASSO: Tutto sotto controllo
+            return "Basso";
         }
 
         private Dictionary<string, TempiProprietario> CalcolaTempiProprietarioPerPriorita(List<SlaRecord> recordsProprietario)
@@ -176,40 +225,6 @@ namespace LivelloHDServicePRO.Services
                     });
         }
 
-        private ValutazioneQualita ValutaProprietario(List<SlaRecord> records, SlaSetup? slaSetup)
-        {
-            if (slaSetup == null || !records.Any()) return ValutazioneQualita.NonValutabile;
-
-            var valutazioni = new List<ValutazioneQualita>();
-
-            // Raggruppa per priorità e valuta ogni gruppo
-            var gruppiPriorita = records.GroupBy(r => r.Priorita).Where(g => !string.IsNullOrEmpty(g.Key));
-
-            foreach (var gruppo in gruppiPriorita)
-            {
-                var regola = _slaSetupService.FindRegolaByPriorita(slaSetup, gruppo.Key!);
-                if (regola == null) continue;
-
-                var tempoMedioTMC = CalcolaTempoMedio(gruppo, r => r.TmcTimeSpan);
-                var tempoMedioTEFF = CalcolaTempoMedio(gruppo, r => r.TeffTimeSpan);
-
-                // Calcola le soglie SLA (semplificato - 8 ore lavorative al giorno)
-                var sogliaTMC = TimeSpan.FromHours((regola.GiorniPresaInCarico * 8) + regola.OrePresaInCarico);
-                var sogliaTEFF = TimeSpan.FromHours((regola.GiorniRisoluzione * 8) + regola.OreRisoluzione);
-
-                valutazioni.Add(ValutaTempo(tempoMedioTMC, sogliaTMC));
-                valutazioni.Add(ValutaTempo(tempoMedioTEFF, sogliaTEFF));
-            }
-
-            // Restituisce la valutazione peggiore
-            if (valutazioni.Contains(ValutazioneQualita.Critico)) return ValutazioneQualita.Critico;
-            if (valutazioni.Contains(ValutazioneQualita.Migliorabile)) return ValutazioneQualita.Migliorabile;
-            if (valutazioni.Contains(ValutazioneQualita.Discreto)) return ValutazioneQualita.Discreto;
-            if (valutazioni.Contains(ValutazioneQualita.Ottimo)) return ValutazioneQualita.Ottimo;
-
-            return ValutazioneQualita.NonValutabile;
-        }
-
         private ValutazioneQualita ValutaTempo(TimeSpan tempoEffettivo, TimeSpan sogliaSkla)
         {
             if (tempoEffettivo == TimeSpan.Zero || sogliaSkla == TimeSpan.Zero) 
@@ -224,6 +239,84 @@ namespace LivelloHDServicePRO.Services
                 >= 0.5 => ValutazioneQualita.Discreto,     // 50-69% del limite
                 _ => ValutazioneQualita.Ottimo             // < 50% del limite
             };
+        }
+        
+        // Metodo semplificato per AnalisiProprietario (retrocompatibilità)
+        private ValutazioneQualita ValutaProprietario(List<SlaRecord> records, SlaSetup? slaSetup)
+        {
+            var punteggio = CalcolaPunteggioProprietario(records, slaSetup);
+            return DeterminaValutazioneQualitativa(punteggio);
+        }
+        
+        private double CalcolaPunteggioProprietario(List<SlaRecord> records, SlaSetup? slaSetup)
+        {
+            if (slaSetup == null || !records.Any()) return 50; // Neutro se non ci sono dati
+
+            var punteggi = new List<double>();
+            var gruppiPriorita = records.GroupBy(r => r.Priorita).Where(g => !string.IsNullOrEmpty(g.Key));
+
+            foreach (var gruppo in gruppiPriorita)
+            {
+                var regola = _slaSetupService.FindRegolaByPriorita(slaSetup, gruppo.Key!);
+                if (regola == null) continue;
+
+                var tempoMedioTMC = CalcolaTempoMedio(gruppo, r => r.TmcTimeSpan);
+                var tempoMedioTEFF = CalcolaTempoMedio(gruppo, r => r.TeffTimeSpan);
+
+                var sogliaTMC = TimeSpan.FromHours((regola.GiorniPresaInCarico * 8) + regola.OrePresaInCarico);
+                var sogliaTEFF = TimeSpan.FromHours((regola.GiorniRisoluzione * 8) + regola.OreRisoluzione);
+
+                punteggi.Add(CalcolaPunteggioDaTempo(tempoMedioTMC, sogliaTMC));
+                punteggi.Add(CalcolaPunteggioDaTempo(tempoMedioTEFF, sogliaTEFF));
+            }
+
+            return punteggi.Any() ? punteggi.Average() : 50;
+        }
+        
+        private double CalcolaPunteggioProprietarioPerPriorita(List<SlaRecord> records, string priorita, SlaSetup? slaSetup)
+        {
+            if (slaSetup == null || !records.Any()) return 50;
+
+            var regola = _slaSetupService.FindRegolaByPriorita(slaSetup, priorita);
+            if (regola == null) return 50;
+
+            var tempoMedioTMC = CalcolaTempoMedio(records, r => r.TmcTimeSpan);
+            var tempoMedioTEFF = CalcolaTempoMedio(records, r => r.TeffTimeSpan);
+
+            var sogliaTMC = TimeSpan.FromHours((regola.GiorniPresaInCarico * 8) + regola.OrePresaInCarico);
+            var sogliaTEFF = TimeSpan.FromHours((regola.GiorniRisoluzione * 8) + regola.OreRisoluzione);
+
+            var punteggioTMC = CalcolaPunteggioDaTempo(tempoMedioTMC, sogliaTMC);
+            var punteggioTEFF = CalcolaPunteggioDaTempo(tempoMedioTEFF, sogliaTEFF);
+
+            return (punteggioTMC + punteggioTEFF) / 2.0;
+        }
+        
+        private double CalcolaPunteggioDaTempo(TimeSpan tempoEffettivo, TimeSpan sogliaSLA)
+        {
+            if (tempoEffettivo == TimeSpan.Zero || sogliaSLA == TimeSpan.Zero) 
+                return 50; // Neutro
+
+            // Se entro SLA ? 100 punti
+            if (tempoEffettivo <= sogliaSLA)
+                return 100;
+
+            // Se fuori SLA ? scala proporzionale
+            // 1 anno lavorativo = 250 giorni * 8 ore = 2000 ore
+            const double annoLavorativoOre = 2000;
+            
+            var scostamentoOre = tempoEffettivo.TotalHours - sogliaSLA.TotalHours;
+            
+            // Se supera di 1 anno o più ? 1 punto
+            if (scostamentoOre >= annoLavorativoOre)
+                return 1;
+            
+            // Altrimenti scala lineare: 100 ? 1 in base allo scostamento
+            // Formula: 100 - (scostamento / annoLavorativo * 99)
+            var percentualeScostamento = scostamentoOre / annoLavorativoOre;
+            var punteggio = 100 - (percentualeScostamento * 99);
+            
+            return Math.Max(1, Math.Min(100, punteggio));
         }
 
         private List<DistribuzionePriorita> CalcolaDistribuzionePriorita(List<SlaRecord> records)
@@ -371,6 +464,9 @@ namespace LivelloHDServicePRO.Services
             // Calcola medie globali per comparazioni
             var tempoMedioGlobaleTMC = CalcolaTempoMedio(records, r => r.TmcTimeSpan);
             var tempoMedioGlobaleTEFF = CalcolaTempoMedio(records, r => r.TeffTimeSpan);
+            
+            // Totale ticket per calcolo percentuali volume
+            var totalTicketsGlobale = records.Count;
 
             var proprietari = records.Where(r => !string.IsNullOrEmpty(r.Proprietario))
                                    .GroupBy(r => r.Proprietario!);
@@ -395,14 +491,17 @@ namespace LivelloHDServicePRO.Services
                     TicketsEntroSLA = ticketsProprietario.Count - ContaTicketsFuoriSLA(ticketsProprietario),
                     TicketsFuoriSLA = ContaTicketsFuoriSLA(ticketsProprietario),
                     
+                    // Lista ticket fuori SLA
+                    ListaTicketFuoriSLA = ticketsProprietario.Where(t => IsFuoriSLA(t.TMCFuoriSLA) || IsFuoriSLA(t.TEFFFuoriSLA)).ToList(),
+                    
                     // Distribuzione per priorità
                     TicketsPerPriorita = ticketsProprietario.Where(t => !string.IsNullOrEmpty(t.Priorita))
                                                           .GroupBy(t => t.Priorita!)
-                                                          .ToDictionary(g => g.Key, g => g.Count()),
-                    
-                    // Valutazione
-                    ValutazioneComplessiva = ValutaProprietario(ticketsProprietario, slaSetup)
+                                                          .ToDictionary(g => g.Key, g => g.Count())
                 };
+                
+                // NUOVO SISTEMA DI VALUTAZIONE SU 100 PUNTI
+                CalcolaValutazioneSu100(analisi, ticketsProprietario, totalTicketsGlobale, slaSetup);
 
                 // Calcola deviazioni dalle medie
                 analisi.DeviazioneDallaMediaTMC = CalcolaDeviazione(analisi.TempoMedioTMC, tempoMedioGlobaleTMC);
@@ -420,9 +519,153 @@ namespace LivelloHDServicePRO.Services
             // Determina posizioni relative
             DeterminaPosizioniRelative(risultati);
 
-            return risultati.OrderByDescending(r => r.VotazioneNumerica)
+            return risultati.OrderByDescending(r => r.PunteggioTotale)
                            .ThenByDescending(r => r.TicketTotali)
                            .ToList();
+        }
+        
+        private void CalcolaValutazioneSu100(AnalisiDettagliataRisorsa analisi, List<SlaRecord> tickets, int totalTicketsGlobale, SlaSetup? slaSetup)
+        {
+            // 1. Punteggio TMC rispetto a SLA (20 punti)
+            analisi.PunteggioTMC = CalcolaPunteggioTMCRispettoSLA(tickets);
+            
+            // 2. Punteggio T-EFF rispetto a SLA (20 punti)
+            analisi.PunteggioTEFF = CalcolaPunteggioTEFFRispettoSLA(tickets);
+            
+            // 3. Valutazione Tempi Medi (20 punti) - media delle valutazioni per priorità
+            analisi.PunteggioTempiMedi = CalcolaPunteggioTempiMedi(tickets, slaSetup);
+            
+            // 4. Tasso Risoluzione (20 punti) - % ticket risolti
+            analisi.PunteggioRisoluzione = CalcolaPunteggioRisoluzione(tickets);
+            
+            // 5. Numero Ticket Gestiti (20 punti) - % rispetto al totale
+            analisi.PunteggioVolume = CalcolaPunteggioVolume(tickets.Count, totalTicketsGlobale);
+            
+            // TOTALE
+            analisi.PunteggioTotale = analisi.PunteggioTMC + 
+                                     analisi.PunteggioTEFF + 
+                                     analisi.PunteggioTempiMedi + 
+                                     analisi.PunteggioRisoluzione + 
+                                     analisi.PunteggioVolume;
+            
+            // Determina valutazione qualitativa per retrocompatibilità
+            analisi.ValutazioneComplessiva = DeterminaValutazioneQualitativa(analisi.PunteggioTotale);
+        }
+        
+        private double CalcolaPunteggioTMCRispettoSLA(List<SlaRecord> tickets)
+        {
+            if (!tickets.Any()) return 0;
+            
+            // Conta quanti ticket hanno TMC entro SLA
+            var ticketsConTMC = tickets.Where(t => !string.IsNullOrWhiteSpace(t.TMCFuoriSLA)).ToList();
+            if (!ticketsConTMC.Any()) return 10; // Neutro se non ci sono dati
+            
+            var ticketsEntroSLA = ticketsConTMC.Count(t => !IsFuoriSLA(t.TMCFuoriSLA));
+            var percentualeEntroSLA = (double)ticketsEntroSLA / ticketsConTMC.Count * 100;
+            
+            // Scala lineare: 0-5% = 1 punto, 95-100% = 20 punti
+            return CalcolaPunteggioDaPercentuale(percentualeEntroSLA);
+        }
+        
+        private double CalcolaPunteggioTEFFRispettoSLA(List<SlaRecord> tickets)
+        {
+            if (!tickets.Any()) return 0;
+            
+            // Conta quanti ticket hanno T-EFF entro SLA
+            var ticketsConTEFF = tickets.Where(t => !string.IsNullOrWhiteSpace(t.TEFFFuoriSLA)).ToList();
+            if (!ticketsConTEFF.Any()) return 10; // Neutro se non ci sono dati
+            
+            var ticketsEntroSLA = ticketsConTEFF.Count(t => !IsFuoriSLA(t.TEFFFuoriSLA));
+            var percentualeEntroSLA = (double)ticketsEntroSLA / ticketsConTEFF.Count * 100;
+            
+            // Scala lineare: 0-5% = 1 punto, 95-100% = 20 punti
+            return CalcolaPunteggioDaPercentuale(percentualeEntroSLA);
+        }
+        
+        private double CalcolaPunteggioTempiMedi(List<SlaRecord> tickets, SlaSetup? slaSetup)
+        {
+            if (slaSetup == null || !tickets.Any()) return 10; // Neutro se non ci sono regole SLA
+            
+            var valutazioniTempi = new List<double>();
+            var gruppiPriorita = tickets.GroupBy(r => r.Priorita).Where(g => !string.IsNullOrEmpty(g.Key));
+
+            foreach (var gruppo in gruppiPriorita)
+            {
+                var regola = _slaSetupService.FindRegolaByPriorita(slaSetup, gruppo.Key!);
+                if (regola == null) continue;
+
+                var tempoMedioTMC = CalcolaTempoMedio(gruppo, r => r.TmcTimeSpan);
+                var tempoMedioTEFF = CalcolaTempoMedio(gruppo, r => r.TeffTimeSpan);
+
+                var sogliaTMC = TimeSpan.FromHours((regola.GiorniPresaInCarico * 8) + regola.OrePresaInCarico);
+                var sogliaTEFF = TimeSpan.FromHours((regola.GiorniRisoluzione * 8) + regola.OreRisoluzione);
+
+                // Valuta quanto sono buoni i tempi rispetto alle soglie
+                if (sogliaTMC > TimeSpan.Zero && tempoMedioTMC > TimeSpan.Zero)
+                {
+                    var percentualeTMC = (1 - (tempoMedioTMC.TotalHours / sogliaTMC.TotalHours)) * 100;
+                    percentualeTMC = Math.Max(0, Math.Min(100, percentualeTMC)); // Clamp 0-100
+                    valutazioniTempi.Add(percentualeTMC);
+                }
+                
+                if (sogliaTEFF > TimeSpan.Zero && tempoMedioTEFF > TimeSpan.Zero)
+                {
+                    var percentualeTEFF = (1 - (tempoMedioTEFF.TotalHours / sogliaTEFF.TotalHours)) * 100;
+                    percentualeTEFF = Math.Max(0, Math.Min(100, percentualeTEFF)); // Clamp 0-100
+                    valutazioniTempi.Add(percentualeTEFF);
+                }
+            }
+
+            if (!valutazioniTempi.Any()) return 10; // Neutro
+            
+            var mediaPercentuale = valutazioniTempi.Average();
+            return CalcolaPunteggioDaPercentuale(mediaPercentuale);
+        }
+        
+        private double CalcolaPunteggioRisoluzione(List<SlaRecord> tickets)
+        {
+            if (!tickets.Any()) return 0;
+            
+            // Conta ticket con MotivoStato contenente "*Risolto*"
+            var ticketsRisolti = tickets.Count(t => !string.IsNullOrEmpty(t.MotivoStato) && 
+                                                    t.MotivoStato.Contains("Risolto", StringComparison.OrdinalIgnoreCase));
+            var percentualeRisolti = (double)ticketsRisolti / tickets.Count * 100;
+            
+            // Scala lineare: 0-5% = 1 punto, 95-100% = 20 punti
+            return CalcolaPunteggioDaPercentuale(percentualeRisolti);
+        }
+        
+        private double CalcolaPunteggioVolume(int ticketsRisorsa, int totalTicketsGlobale)
+        {
+            if (totalTicketsGlobale == 0) return 0;
+            
+            var percentualeVolume = (double)ticketsRisorsa / totalTicketsGlobale * 100;
+            
+            // Scala lineare: 0-5% = 1 punto, 95-100% = 20 punti
+            // Nota: È improbabile che una singola risorsa gestisca il 95%, ma la scala è lineare
+            return CalcolaPunteggioDaPercentuale(percentualeVolume);
+        }
+        
+        private double CalcolaPunteggioDaPercentuale(double percentuale)
+        {
+            // Scala lineare: 0-5% = 1 punto, 95-100% = 20 punti
+            // Formula: punteggio = 1 + (percentuale / 100) * 19
+            // Se percentuale è 0% ? 1 punto
+            // Se percentuale è 5% ? 1.95 punti
+            // Se percentuale è 50% ? 10.5 punti
+            // Se percentuale è 95% ? 19.05 punti
+            // Se percentuale è 100% ? 20 punti
+            
+            percentuale = Math.Max(0, Math.Min(100, percentuale)); // Clamp 0-100
+            return 1 + (percentuale / 100.0) * 19.0;
+        }
+        
+        private ValutazioneQualita DeterminaValutazioneQualitativa(double punteggio)
+        {
+            if (punteggio >= 80) return ValutazioneQualita.Ottimo;      // 80-100
+            if (punteggio >= 60) return ValutazioneQualita.Discreto;    // 60-79
+            if (punteggio >= 40) return ValutazioneQualita.Migliorabile; // 40-59
+            return ValutazioneQualita.Critico;                            // <40
         }
 
         private double CalcolaDeviazione(TimeSpan tempoIndividuale, TimeSpan tempoMedio)
