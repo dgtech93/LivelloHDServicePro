@@ -83,7 +83,7 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.1.1] - 2024-12-XX
+## [1.1.1] - 2024-12-20
 
 ### ?? Corretto
 - **BUGFIX CRITICO**: Risolto errore "Access Denied" durante il salvataggio delle configurazioni

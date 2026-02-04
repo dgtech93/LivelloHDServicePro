@@ -53,7 +53,7 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 ; File principali dell'applicazione (dalla cartella publish)
-Source: "..\LivelloHDServicePRO\bin\Release\net10.0-windows\win-x64\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\Publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Non usare "Flags: ignoreversion" su file di sistema o condivisi
 
 [Icons]
