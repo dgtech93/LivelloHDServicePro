@@ -2,7 +2,7 @@
 ; Richiede Inno Setup 6.x o superiore (download da: https://jrsoftware.org/isdl.php)
 
 #define MyAppName "Livello HD Service PRO"
-#define MyAppVersion "1.1.1"
+#define MyAppVersion "1.1.2"
 #define MyAppPublisher "Livello HD"
 #define MyAppExeName "LivelloHDServicePRO.exe"
 #define MyAppAssocName MyAppName
