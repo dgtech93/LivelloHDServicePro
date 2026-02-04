@@ -9,8 +9,12 @@ namespace LivelloHDServicePRO.Services
 {
     public class SlaSetupService
     {
-        private const string ConfigDirectory = "Config";
         private const string SlaFileName = "SlaSetup.xml";
+        private static string ConfigDirectory => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "LivelloHDServicePRO",
+            "Config"
+        );
         private string ConfigFilePath => Path.Combine(ConfigDirectory, SlaFileName);
 
         public SlaSetupService()

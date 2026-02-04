@@ -9,8 +9,12 @@ namespace LivelloHDServicePRO.Services
 {
     public class OrariLavorativiService
     {
-        private const string ConfigDirectory = "Config";
         private const string OrariFileName = "OrariLavorativi.xml";
+        private static string ConfigDirectory => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "LivelloHDServicePRO",
+            "Config"
+        );
         private string ConfigFilePath => Path.Combine(ConfigDirectory, OrariFileName);
 
         public OrariLavorativiService()

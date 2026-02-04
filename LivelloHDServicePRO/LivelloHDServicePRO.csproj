@@ -11,8 +11,8 @@
     <Product>Livello HD Service PRO</Product>
     <Company>Livello HD</Company>
     <Copyright>Copyright © 2024 Livello HD</Copyright>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
+    <AssemblyVersion>1.1.1.0</AssemblyVersion>
+    <FileVersion>1.1.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -9,8 +9,12 @@ namespace LivelloHDServicePRO.Services
 {
     public class FestivitaService
     {
-        private const string ConfigDirectory = "Config";
         private const string FestivitaFileName = "Festivita.xml";
+        private static string ConfigDirectory => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "LivelloHDServicePRO",
+            "Config"
+        );
         private string ConfigFilePath => Path.Combine(ConfigDirectory, FestivitaFileName);
 
         public FestivitaService()

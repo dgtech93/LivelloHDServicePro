@@ -2,7 +2,7 @@
 ; Richiede Inno Setup 6.x o superiore (download da: https://jrsoftware.org/isdl.php)
 
 #define MyAppName "Livello HD Service PRO"
-#define MyAppVersion "1.1.1"
+#define MyAppVersion "1.0.0"
 #define MyAppPublisher "Livello HD"
 #define MyAppExeName "LivelloHDServicePRO.exe"
 #define MyAppAssocName MyAppName
@@ -22,7 +22,7 @@ LicenseFile=..\LICENSE.txt
 InfoBeforeFile=..\README.txt
 OutputDir=..\Releases
 OutputBaseFilename=LivelloHDServicePRO_Setup_v{#MyAppVersion}
-SetupIconFile=..\LivelloHDServicePRO\Assets\sla.ico
+; SetupIconFile=..\LivelloHDServicePRO\Assets\app-icon.ico  ; Decommenta e modifica se hai un'icona personalizzata
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
@@ -132,5 +132,3 @@ Root: HKCU; Subkey: "Software\LivelloHD\LivelloHDServicePRO\Settings"; ValueType
 [Messages]
 italian.WelcomeLabel2=Questo installerà [name/ver] sul tuo computer.%n%nSi raccomanda di chiudere tutte le altre applicazioni prima di continuare.
 italian.FinishedLabel=L'installazione di [name] è stata completata con successo.%n%nL'applicazione può essere avviata selezionando l'icona installata.
-
-

@@ -4,6 +4,23 @@ Tutte le modifiche importanti a questo progetto saranno documentate in questo fi
 
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.1] - 2024-12-XX
+
+### ?? Corretto
+- **BUGFIX CRITICO**: Risolto errore "Access Denied" durante il salvataggio delle configurazioni
+  - I file di configurazione ora vengono salvati in `%LOCALAPPDATA%\LivelloHDServicePRO\Config\` invece di `Program Files`
+  - Risolve il problema di permessi quando si salvano:
+    - Orari Lavorativi (`OrariLavorativi.xml`)
+    - Setup SLA (`SlaSetup.xml`)
+    - Festivita (`Festivita.xml`)
+  - L'applicazione ora funziona correttamente senza privilegi di amministratore
+
+### ?? Percorsi Aggiornati
+- **Prima**: `C:\Program Files\Livello HD Service PRO\Config\` (richiede admin) ?
+- **Dopo**: `C:\Users\[USERNAME]\AppData\Local\LivelloHDServicePRO\Config\` (utente standard) ?
+
+---
+
 ## [1.1.0] - 2024-12-XX
 
 ### ?? Aggiunto
