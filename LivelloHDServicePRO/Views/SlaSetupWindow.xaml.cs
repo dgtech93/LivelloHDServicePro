@@ -156,12 +156,13 @@ namespace LivelloHDServicePRO.Views
 
         private void NuovoClienteButton_Click(object sender, RoutedEventArgs e)
         {
-            var nomeCliente = Microsoft.VisualBasic.Interaction.InputBox(
+            var nomeCliente = InputDialogWindow.Show(
                 "Inserisci il nome del nuovo cliente:\n\n" +
                 "Esempio: 'Azienda S.p.A.', 'Cliente Test', ecc.\n\n" +
-                "Il setup SLA verra creato con priorita standard.", 
+                "Il setup SLA verrà creato con priorità standard.", 
                 "Nuovo Cliente SLA", 
-                "");
+                "",
+                this);
 
             if (!string.IsNullOrWhiteSpace(nomeCliente))
             {

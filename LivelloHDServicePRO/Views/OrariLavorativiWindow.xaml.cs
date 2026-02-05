@@ -295,10 +295,11 @@ namespace LivelloHDServicePRO.Views
 
         private void NuovoClienteButton_Click(object sender, RoutedEventArgs e)
         {
-            var nomeCliente = Microsoft.VisualBasic.Interaction.InputBox(
+            var nomeCliente = InputDialogWindow.Show(
                 "Inserisci il nome del nuovo cliente:", 
                 "Nuovo Cliente", 
-                "");
+                "",
+                this);
 
             if (!string.IsNullOrWhiteSpace(nomeCliente))
             {

@@ -4,6 +4,50 @@ Tutte le modifiche importanti a questo progetto saranno documentate in questo fi
 
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.3] - 2026-02-05
+
+### ?? HOTFIX Critico
+- **BUGFIX CRITICO**: Risolto crash all'avvio su altri PC
+  - **Problema**: `System.PlatformNotSupportedException: Method requires System.Windows.Forms`
+  - **Causa**: `Microsoft.VisualBasic.Interaction.InputBox` non supportato in .NET 10 WPF
+  - **Soluzione**: Sostituito con `InputDialogWindow` WPF nativo
+  - Rimosso pacchetto `Microsoft.VisualBasic` (non più necessario)
+  - Crash risolto nei seguenti scenari:
+    - Creazione nuovo cliente da "Setup SLA"
+    - Creazione nuovo cliente da "Orari Lavorativi"
+
+### ? Miglioramenti UI
+- **InputDialogWindow**: Dialog WPF moderno e responsive
+  - ? **Layout adattivo**: Finestra si adatta automaticamente al contenuto (`SizeToContent="WidthAndHeight"`)
+  - ? **Dimensioni ottimizzate**: 
+    - `MinWidth="450px"` - Garantisce leggibilità
+    - `MaxWidth="700px"` - Previene finestre troppo larghe
+  - ? **TextBox migliorata**:
+    - Altezza: 40px (più spaziosa)
+    - Font size: 14 (più leggibile)
+    - Padding: 10px (più comoda)
+    - Bordo visibile per migliore identificazione
+  - ? **Pulsanti sempre visibili**: Layout a 3 righe (Auto) senza spazi vuoti
+  - ? **Stile moderno**: Coerente con il design dell'applicazione
+  - ? **Focus automatico**: TextBox selezionata all'apertura
+
+### ?? File Modificati
+- **Nuovo**: `InputDialogWindow.xaml` - Dialog WPF nativo
+- **Nuovo**: `InputDialogWindow.xaml.cs` - Logica e API semplificata
+- **Aggiornato**: `SlaSetupWindow.xaml.cs` - Sostituito InputBox
+- **Aggiornato**: `OrariLavorativiWindow.xaml.cs` - Sostituito InputBox
+- **Aggiornato**: `LivelloHDServicePRO.csproj` - Rimosso Microsoft.VisualBasic
+- **Aggiornato**: `MainWindow.xaml` - Versione aggiornata a v1.1.3
+
+### ? Benefici
+- ? **Stabilità**: Applicazione funziona su tutti i PC con .NET 10
+- ? **Nessuna dipendenza**: Eliminata dipendenza da Windows.Forms
+- ? **UX migliorata**: Dialog più grande, leggibile e responsive
+- ? **Dimensioni ridotte**: Installer più leggero (dipendenza rimossa)
+- ? **Manutenibilità**: Codice WPF nativo più pulito
+
+---
+
 ## [1.1.2] - 2026-02-04
 
 ### ?? Corretto
