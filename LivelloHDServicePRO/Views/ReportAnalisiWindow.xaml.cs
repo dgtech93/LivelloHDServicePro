@@ -61,8 +61,17 @@ namespace LivelloHDServicePRO.Views
                 // Riepilogo esecutivo
                 TempoMedioGlobaleTMCText.Text = _reportData.RiepilogoGenerale.TempoMedioGlobaleTMCFormatted;
                 TempoMedioGlobaleTEFFText.Text = _reportData.RiepilogoGenerale.TempoMedioGlobaleTEFFFormatted;
-                ProprietarioMiglioreText.Text = _reportData.RiepilogoGenerale.ProprietarioMigliore;
-                ProprietarioCriticoText.Text = _reportData.RiepilogoGenerale.ProprietarioCritico;
+                
+                // MIGLIORI (metriche oggettive)
+                ProprietarioMiglioreText.Text = $"• TMC più basso: {_reportData.RiepilogoGenerale.MiglioreMediaTMC} ({_reportData.RiepilogoGenerale.MiglioreMediaTMCValoreFormatted})\n" +
+                                               $"• T-EFF più basso: {_reportData.RiepilogoGenerale.MiglioreMediaTEFF} ({_reportData.RiepilogoGenerale.MiglioreMediaTEFFValoreFormatted})\n" +
+                                               $"• Volume più alto: {_reportData.RiepilogoGenerale.MaggioreVolumeTK} ({_reportData.RiepilogoGenerale.MaggioreVolumeTKValore} TK)";
+                
+                // PEGGIORI (metriche oggettive)
+                ProprietarioCriticoText.Text = $"• TMC più alto: {_reportData.RiepilogoGenerale.PeggioreMediaTMC} ({_reportData.RiepilogoGenerale.PeggioreMediaTMCValoreFormatted})\n" +
+                                              $"• T-EFF più alto: {_reportData.RiepilogoGenerale.PeggioreMediaTEFF} ({_reportData.RiepilogoGenerale.PeggioreMediaTEFFValoreFormatted})\n" +
+                                              $"• Volume più basso: {_reportData.RiepilogoGenerale.MinoreVolumeTK} ({_reportData.RiepilogoGenerale.MinoreVolumeTKValore} TK)";
+                
                 PrioritaProblematicaText.Text = _reportData.RiepilogoGenerale.PrioritaPiuProblematica;
                 PrioritaMenoProblematicaText.Text = _reportData.RiepilogoGenerale.PrioritaMenoProblematica;
 
@@ -340,10 +349,22 @@ namespace LivelloHDServicePRO.Views
                     {"Metrica", "Tempo Medio T-EFF Globale"}, {"Valore", _reportData.RiepilogoGenerale.TempoMedioGlobaleTEFFFormatted}
                 },
                 new() {
-                    {"Metrica", "Proprietario Migliore"}, {"Valore", _reportData.RiepilogoGenerale.ProprietarioMigliore}
+                    {"Metrica", "Migliore Media TMC"}, {"Valore", $"{_reportData.RiepilogoGenerale.MiglioreMediaTMC} ({_reportData.RiepilogoGenerale.MiglioreMediaTMCValoreFormatted})"}
                 },
                 new() {
-                    {"Metrica", "Proprietario Critico"}, {"Valore", _reportData.RiepilogoGenerale.ProprietarioCritico}
+                    {"Metrica", "Migliore Media T-EFF"}, {"Valore", $"{_reportData.RiepilogoGenerale.MiglioreMediaTEFF} ({_reportData.RiepilogoGenerale.MiglioreMediaTEFFValoreFormatted})"}
+                },
+                new() {
+                    {"Metrica", "Maggior Volume TK"}, {"Valore", $"{_reportData.RiepilogoGenerale.MaggioreVolumeTK} ({_reportData.RiepilogoGenerale.MaggioreVolumeTKValore})"}
+                },
+                new() {
+                    {"Metrica", "Peggiore Media TMC"}, {"Valore", $"{_reportData.RiepilogoGenerale.PeggioreMediaTMC} ({_reportData.RiepilogoGenerale.PeggioreMediaTMCValoreFormatted})"}
+                },
+                new() {
+                    {"Metrica", "Peggiore Media T-EFF"}, {"Valore", $"{_reportData.RiepilogoGenerale.PeggioreMediaTEFF} ({_reportData.RiepilogoGenerale.PeggioreMediaTEFFValoreFormatted})"}
+                },
+                new() {
+                    {"Metrica", "Minor Volume TK"}, {"Valore", $"{_reportData.RiepilogoGenerale.MinoreVolumeTK} ({_reportData.RiepilogoGenerale.MinoreVolumeTKValore})"}
                 }
             };
 

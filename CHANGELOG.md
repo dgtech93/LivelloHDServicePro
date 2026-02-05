@@ -4,7 +4,7 @@ Tutte le modifiche importanti a questo progetto saranno documentate in questo fi
 
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.1.2] - 2024-12-XX
+## [1.1.2] - 2026-02-04
 
 ### ?? Corretto
 - **BUGFIX CRITICO**: "Analisi Risorse per Priorità" ora calcola correttamente le medie
@@ -18,6 +18,30 @@ Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     - ?? **Giallo** (Medio): IndiceGravità > 1000 O T-EFF > 50h O >30% fuori SLA
     - ?? **Verde** (Basso): Sotto controllo
   - Nuova colonna "Livello" per immediata identificazione criticità
+
+- **REFACTOR LIVELLO GRAVITÀ**: Calcolo semplificato e basato su metriche oggettive
+  - **Eliminato**: Sistema complesso con indice multi-fattoriale
+  - **Nuovo**: Livello basato SOLO sul **ritardo medio SLA** (molto più chiaro!)
+  - **Soglie oggettive**:
+    - ?? **Critico**: Ritardo medio > 100 ore (>12 giorni lavorativi)
+    - ?? **Alto**: Ritardo medio > 40 ore (>5 giorni lavorativi)
+    - ?? **Medio**: Ritardo medio > 16 ore (>2 giorni lavorativi)
+    - ?? **Basso**: Ritardo medio ? 16 ore
+  - Più facile da capire e spiegare ai manager!
+
+- **REFACTOR RIEPILOGO ESECUTIVO**: Dati oggettivi invece di valutazioni soggettive
+  - **Eliminato**: "Proprietario Migliore/Critico" (valutazione generica confusa)
+  - **Nuovo**: Metriche oggettive e chiare divise in:
+    - **MIGLIORI PERFORMANCE**:
+      - Media TMC più bassa + valore
+      - Media T-EFF più bassa + valore
+      - Maggior volume ticket gestiti + numero
+    - **DA MIGLIORARE**:
+      - Media TMC più alta + valore
+      - Media T-EFF più alta + valore
+      - Minor volume ticket gestiti + numero
+  - Ogni metrica mostra NOME + VALORE numerico (trasparenza totale!)
+  - Aggiornato in: Report UI, Excel export, PDF export
   
 - **BUGFIX PDF**: Esportazione PDF Report completo ora aggiornata
 - **"Analisi Proprietari" ? "Analisi Risorse"**

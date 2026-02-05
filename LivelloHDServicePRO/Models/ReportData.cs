@@ -351,7 +351,7 @@ namespace LivelloHDServicePRO.Models
     }
 
     /// <summary>
-    /// Statistiche di riepilogo generale
+    /// Statistiche di riepilogo generale con metriche oggettive
     /// </summary>
     public class RiepilogoStatistiche
     {
@@ -362,9 +362,27 @@ namespace LivelloHDServicePRO.Models
         public double PercentualeComplessivaEntroSLA { get; set; }
         public double PercentualeComplessivaFuoriSLA { get; set; }
         
-        public string ProprietarioMigliore { get; set; } = string.Empty;
-        public string ProprietarioCritico { get; set; } = string.Empty;
+        // MIGLIORI PERFORMANCE (metriche oggettive)
+        public string MiglioreMediaTMC { get; set; } = string.Empty;
+        public TimeSpan MiglioreMediaTMCValore { get; set; }
         
+        public string MiglioreMediaTEFF { get; set; } = string.Empty;
+        public TimeSpan MiglioreMediaTEFFValore { get; set; }
+        
+        public string MaggioreVolumeTK { get; set; } = string.Empty;
+        public int MaggioreVolumeTKValore { get; set; }
+        
+        // PEGGIORI PERFORMANCE (metriche oggettive)
+        public string PeggioreMediaTMC { get; set; } = string.Empty;
+        public TimeSpan PeggioreMediaTMCValore { get; set; }
+        
+        public string PeggioreMediaTEFF { get; set; } = string.Empty;
+        public TimeSpan PeggioreMediaTEFFValore { get; set; }
+        
+        public string MinoreVolumeTK { get; set; } = string.Empty;
+        public int MinoreVolumeTKValore { get; set; }
+        
+        // Priorità
         public string PrioritaPiuProblematica { get; set; } = string.Empty;
         public string PrioritaMenoProblematica { get; set; } = string.Empty;
 
@@ -372,6 +390,11 @@ namespace LivelloHDServicePRO.Models
         public string TempoMedioGlobaleTMCFormatted => FormatTimeSpan(TempoMedioGlobaleTMC);
         public string TempoMedioGlobaleTMSFormatted => FormatTimeSpan(TempoMedioGlobaleTMS);
         public string TempoMedioGlobaleTEFFFormatted => FormatTimeSpan(TempoMedioGlobaleTEFF);
+        
+        public string MiglioreMediaTMCValoreFormatted => FormatTimeSpan(MiglioreMediaTMCValore);
+        public string MiglioreMediaTEFFValoreFormatted => FormatTimeSpan(MiglioreMediaTEFFValore);
+        public string PeggioreMediaTMCValoreFormatted => FormatTimeSpan(PeggioreMediaTMCValore);
+        public string PeggioreMediaTEFFValoreFormatted => FormatTimeSpan(PeggioreMediaTEFFValore);
 
         private static string FormatTimeSpan(TimeSpan ts)
         {

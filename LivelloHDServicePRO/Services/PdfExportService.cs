@@ -185,8 +185,24 @@ namespace LivelloHDServicePRO.Services
                 TempoMedioGlobaleTEFF = original.RiepilogoGenerale.TempoMedioGlobaleTEFF,
                 PercentualeComplessivaEntroSLA = original.RiepilogoGenerale.PercentualeComplessivaEntroSLA,
                 PercentualeComplessivaFuoriSLA = original.RiepilogoGenerale.PercentualeComplessivaFuoriSLA,
-                ProprietarioMigliore = SanitizeText(original.RiepilogoGenerale.ProprietarioMigliore),
-                ProprietarioCritico = SanitizeText(original.RiepilogoGenerale.ProprietarioCritico),
+                
+                // MIGLIORI
+                MiglioreMediaTMC = SanitizeText(original.RiepilogoGenerale.MiglioreMediaTMC),
+                MiglioreMediaTMCValore = original.RiepilogoGenerale.MiglioreMediaTMCValore,
+                MiglioreMediaTEFF = SanitizeText(original.RiepilogoGenerale.MiglioreMediaTEFF),
+                MiglioreMediaTEFFValore = original.RiepilogoGenerale.MiglioreMediaTEFFValore,
+                MaggioreVolumeTK = SanitizeText(original.RiepilogoGenerale.MaggioreVolumeTK),
+                MaggioreVolumeTKValore = original.RiepilogoGenerale.MaggioreVolumeTKValore,
+                
+                // PEGGIORI
+                PeggioreMediaTMC = SanitizeText(original.RiepilogoGenerale.PeggioreMediaTMC),
+                PeggioreMediaTMCValore = original.RiepilogoGenerale.PeggioreMediaTMCValore,
+                PeggioreMediaTEFF = SanitizeText(original.RiepilogoGenerale.PeggioreMediaTEFF),
+                PeggioreMediaTEFFValore = original.RiepilogoGenerale.PeggioreMediaTEFFValore,
+                MinoreVolumeTK = SanitizeText(original.RiepilogoGenerale.MinoreVolumeTK),
+                MinoreVolumeTKValore = original.RiepilogoGenerale.MinoreVolumeTKValore,
+                
+                // Priorità
                 PrioritaPiuProblematica = SanitizeText(original.RiepilogoGenerale.PrioritaPiuProblematica),
                 PrioritaMenoProblematica = SanitizeText(original.RiepilogoGenerale.PrioritaMenoProblematica)
             };
@@ -715,12 +731,24 @@ namespace LivelloHDServicePRO.Services
 
                     row.ConstantItem(20);
 
-                    // Performance
+                    // Performance (MIGLIORI - Metriche oggettive)
                     row.RelativeItem().Column(col =>
                     {
                         col.Item().Text("MIGLIORI PERFORMANCE").FontSize(12).SemiBold();
-                        col.Item().Text($"Migliore: {SanitizeText(riepilogo.ProprietarioMigliore)}").FontColor(Colors.Green.Medium);
-                        col.Item().Text($"Da migliorare: {SanitizeText(riepilogo.ProprietarioCritico)}").FontColor(Colors.Red.Medium);
+                        col.Item().Text($"• TMC: {SanitizeText(riepilogo.MiglioreMediaTMC)} ({riepilogo.MiglioreMediaTMCValoreFormatted})").FontSize(9).FontColor(Colors.Green.Medium);
+                        col.Item().Text($"• T-EFF: {SanitizeText(riepilogo.MiglioreMediaTEFF)} ({riepilogo.MiglioreMediaTEFFValoreFormatted})").FontSize(9).FontColor(Colors.Green.Medium);
+                        col.Item().Text($"• Volume: {SanitizeText(riepilogo.MaggioreVolumeTK)} ({riepilogo.MaggioreVolumeTKValore} TK)").FontSize(9).FontColor(Colors.Green.Medium);
+                    });
+                    
+                    row.ConstantItem(20);
+                    
+                    // Performance (PEGGIORI - Metriche oggettive)
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("DA MIGLIORARE").FontSize(12).SemiBold();
+                        col.Item().Text($"• TMC: {SanitizeText(riepilogo.PeggioreMediaTMC)} ({riepilogo.PeggioreMediaTMCValoreFormatted})").FontSize(9).FontColor(Colors.Red.Medium);
+                        col.Item().Text($"• T-EFF: {SanitizeText(riepilogo.PeggioreMediaTEFF)} ({riepilogo.PeggioreMediaTEFFValoreFormatted})").FontSize(9).FontColor(Colors.Red.Medium);
+                        col.Item().Text($"• Volume: {SanitizeText(riepilogo.MinoreVolumeTK)} ({riepilogo.MinoreVolumeTKValore} TK)").FontSize(9).FontColor(Colors.Red.Medium);
                     });
                 });
 

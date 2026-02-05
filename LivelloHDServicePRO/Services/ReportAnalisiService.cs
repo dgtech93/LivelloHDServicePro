@@ -164,19 +164,18 @@ namespace LivelloHDServicePRO.Services
                         NumeroTEFFSuoriSLA = numeroTEFFSuoriSLA
                     };
                     
-                    // Calcola INDICE DI GRAVITA
-                    // Formula: (Ore T-EFF * NumeroTickets * fattore fuori SLA)
-                    var percentualeFuoriSLA = ticketsGruppo.Count > 0 
-                        ? ((double)analisi.TicketsFuoriSLA / ticketsGruppo.Count) * 100 
-                        : 0;
+                    // Calcola INDICE DI GRAVITA basato sul ritardo medio SLA
+                    // Più alto è il ritardo medio, più è critico
+                    var ritardoMedioTMC = CalcolaRitardoMedioSLA(ticketsGruppo, t => t.TMCFuoriSLA);
+                    var ritardoMedioTEFF = CalcolaRitardoMedioSLA(ticketsGruppo, t => t.TEFFFuoriSLA);
                     
-                    var oreTEFF = tempoMedioTEFF.TotalHours;
-                    var fattoreFuoriSLA = 1 + (percentualeFuoriSLA / 100.0); // 1.0 se 0% fuori, 2.0 se 100% fuori
+                    // Usa il ritardo peggiore tra TMC e T-EFF
+                    var ritardoMedioOre = Math.Max(ritardoMedioTMC, ritardoMedioTEFF);
+                    analisi.IndiceGravita = ritardoMedioOre * ticketsGruppo.Count; // Ritardo * Volume
                     
-                    analisi.IndiceGravita = oreTEFF * ticketsGruppo.Count * fattoreFuoriSLA;
+                    // Determina livello basato SOLO sul ritardo medio (oggettivo)
+                    analisi.LivelloGravita = DeterminaLivelloGravitaDaRitardo(ritardoMedioOre);
                     
-                    // Determina livello di gravità
-                    analisi.LivelloGravita = DeterminaLivelloGravita(analisi.IndiceGravita, oreTEFF, percentualeFuoriSLA);
                     
                     // Calcola punteggio su 100
                     analisi.Punteggio = CalcolaPunteggioProprietarioPerPriorita(ticketsGruppo, g.Key.Priorita!, slaSetup);
@@ -189,6 +188,58 @@ namespace LivelloHDServicePRO.Services
                 .ToList();
             
             return risultati;
+        }
+        
+        
+        /// <summary>
+        /// Calcola ritardo medio SLA in ore (solo per ticket fuori SLA)
+        /// </summary>
+        private double CalcolaRitardoMedioSLA(List<SlaRecord> tickets, Func<SlaRecord, string?> slaFieldSelector)
+        {
+            var ticketsFuoriSLA = tickets
+                .Where(t => IsFuoriSLA(slaFieldSelector(t)))
+                .Select(t => slaFieldSelector(t))
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToList();
+            
+            if (!ticketsFuoriSLA.Any()) return 0;
+            
+            var ritardi = new List<double>();
+            foreach (var slaValue in ticketsFuoriSLA)
+            {
+                // Estrae le ore dal formato "+XX:YY:ZZ" 
+                if (slaValue!.StartsWith("+"))
+                {
+                    var parts = slaValue.Substring(1).Split(':');
+                    if (parts.Length >= 2 && int.TryParse(parts[0], out int ore) && int.TryParse(parts[1], out int minuti))
+                    {
+                        ritardi.Add(ore + (minuti / 60.0));
+                    }
+                }
+            }
+            
+            return ritardi.Any() ? ritardi.Average() : 0;
+        }
+        
+        /// <summary>
+        /// Determina livello di gravità basato SOLO sul ritardo medio SLA (oggettivo)
+        /// </summary>
+        private string DeterminaLivelloGravitaDaRitardo(double ritardoMedioOre)
+        {
+            // CRITICO: Ritardo medio > 100 ore (circa 12.5 giorni lavorativi)
+            if (ritardoMedioOre > 100)
+                return "Critico";
+            
+            // ALTO: Ritardo medio > 40 ore (circa 5 giorni lavorativi)
+            if (ritardoMedioOre > 40)
+                return "Alto";
+            
+            // MEDIO: Ritardo medio > 16 ore (circa 2 giorni lavorativi)
+            if (ritardoMedioOre > 16)
+                return "Medio";
+            
+            // BASSO: Ritardo medio <= 16 ore
+            return "Basso";
         }
         
         private string DeterminaLivelloGravita(double indiceGravita, double oreTEFF, double percentualeFuoriSLA)
@@ -396,18 +447,79 @@ namespace LivelloHDServicePRO.Services
             riepilogo.PercentualeComplessivaFuoriSLA = totalConSLA > 0 ? (double)totalFuoriSLA / totalConSLA * 100 : 0;
             riepilogo.PercentualeComplessivaEntroSLA = 100 - riepilogo.PercentualeComplessivaFuoriSLA;
 
-            // Trova migliore e peggiore proprietario
-            if (reportData.AnalisiProprietari.Any())
+            // Trova migliori e peggiori con metriche oggettive
+            if (reportData.AnalisiDettagliataRisorse.Any())
             {
-                riepilogo.ProprietarioMigliore = reportData.AnalisiProprietari
-                    .Where(p => p.ValutazioneComplessiva == ValutazioneQualita.Ottimo)
-                    .OrderByDescending(p => p.TotalTickets)
-                    .FirstOrDefault()?.NomeProprietario ?? "Nessuno";
-
-                riepilogo.ProprietarioCritico = reportData.AnalisiProprietari
-                    .Where(p => p.ValutazioneComplessiva == ValutazioneQualita.Critico)
-                    .OrderByDescending(p => p.TotalTickets)
-                    .FirstOrDefault()?.NomeProprietario ?? "Nessuno";
+                var risorseConDatiSufficienti = reportData.AnalisiDettagliataRisorse
+                    .Where(r => r.TicketTotali >= 5) // Minimo 5 ticket per essere significativi
+                    .ToList();
+                
+                if (risorseConDatiSufficienti.Any())
+                {
+                    // MIGLIORI: Media TMC più bassa
+                    var miglioreTMC = risorseConDatiSufficienti
+                        .Where(r => r.TempoMedioTMC > TimeSpan.Zero)
+                        .OrderBy(r => r.TempoMedioTMC)
+                        .FirstOrDefault();
+                    if (miglioreTMC != null)
+                    {
+                        riepilogo.MiglioreMediaTMC = miglioreTMC.NomeProprietario;
+                        riepilogo.MiglioreMediaTMCValore = miglioreTMC.TempoMedioTMC;
+                    }
+                    
+                    // MIGLIORI: Media T-EFF più bassa
+                    var miglioreTEFF = risorseConDatiSufficienti
+                        .Where(r => r.TempoMedioTEFF > TimeSpan.Zero)
+                        .OrderBy(r => r.TempoMedioTEFF)
+                        .FirstOrDefault();
+                    if (miglioreTEFF != null)
+                    {
+                        riepilogo.MiglioreMediaTEFF = miglioreTEFF.NomeProprietario;
+                        riepilogo.MiglioreMediaTEFFValore = miglioreTEFF.TempoMedioTEFF;
+                    }
+                    
+                    // MIGLIORI: Maggior volume di ticket gestiti
+                    var maggioreVolume = risorseConDatiSufficienti
+                        .OrderByDescending(r => r.TicketTotali)
+                        .FirstOrDefault();
+                    if (maggioreVolume != null)
+                    {
+                        riepilogo.MaggioreVolumeTK = maggioreVolume.NomeProprietario;
+                        riepilogo.MaggioreVolumeTKValore = maggioreVolume.TicketTotali;
+                    }
+                    
+                    // PEGGIORI: Media TMC più alta
+                    var peggioreTMC = risorseConDatiSufficienti
+                        .Where(r => r.TempoMedioTMC > TimeSpan.Zero)
+                        .OrderByDescending(r => r.TempoMedioTMC)
+                        .FirstOrDefault();
+                    if (peggioreTMC != null)
+                    {
+                        riepilogo.PeggioreMediaTMC = peggioreTMC.NomeProprietario;
+                        riepilogo.PeggioreMediaTMCValore = peggioreTMC.TempoMedioTMC;
+                    }
+                    
+                    // PEGGIORI: Media T-EFF più alta
+                    var peggioreTEFF = risorseConDatiSufficienti
+                        .Where(r => r.TempoMedioTEFF > TimeSpan.Zero)
+                        .OrderByDescending(r => r.TempoMedioTEFF)
+                        .FirstOrDefault();
+                    if (peggioreTEFF != null)
+                    {
+                        riepilogo.PeggioreMediaTEFF = peggioreTEFF.NomeProprietario;
+                        riepilogo.PeggioreMediaTEFFValore = peggioreTEFF.TempoMedioTEFF;
+                    }
+                    
+                    // PEGGIORI: Minor volume di ticket gestiti
+                    var minoreVolume = risorseConDatiSufficienti
+                        .OrderBy(r => r.TicketTotali)
+                        .FirstOrDefault();
+                    if (minoreVolume != null)
+                    {
+                        riepilogo.MinoreVolumeTK = minoreVolume.NomeProprietario;
+                        riepilogo.MinoreVolumeTKValore = minoreVolume.TicketTotali;
+                    }
+                }
             }
 
             // Trova priorità più/meno problematiche
